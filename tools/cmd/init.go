@@ -34,6 +34,7 @@ func runInit() {
 		"Core/Src/app_entry.c",
 		"STM32_BLE/App/app_ble.c",
 		"STM32_BLE/App/ble_conf.h",
+		"STM32_BLE/App/ibeacon_service.c",
 	}
 
 	savedCodes := make(map[string]internal.UserCodeMap)
