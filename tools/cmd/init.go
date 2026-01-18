@@ -96,11 +96,10 @@ func runInit() {
 			fmt.Printf("Error generating Makefile: %v\n", err)
 		}
 	
-		// 6. Apply Project Configuration
-		if config, err := internal.LoadConfig(); err == nil {
-			fmt.Println("Applying project configuration...")
-			internal.ApplyLPMSetting(config.DisableLPM)
-		}
-		
+			// 6. Apply Project Configuration
+			if config, err := internal.LoadConfig(); err == nil {
+				fmt.Println("Applying project configuration...")
+				internal.ApplyConfig(config)
+			}		
 		fmt.Println("Initialization complete.")
 	}

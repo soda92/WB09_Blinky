@@ -1,3 +1,5 @@
 {
-  "disable_lpm": true
+  "disable_lpm": true,
+  "enable_trace": true,
+  "mac_address": "0x112233445566"
 }

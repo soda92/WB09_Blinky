@@ -6,7 +6,9 @@ import (
 )
 
 type ProjectConfig struct {
-	DisableLPM bool `json:"disable_lpm"`
+	DisableLPM  bool   `json:"disable_lpm"`
+	EnableTrace bool   `json:"enable_trace"`
+	MacAddress  string `json:"mac_address"`
 }
 
 const ConfigFile = "wb09.json"
