@@ -1,7 +1,6 @@
-package main
+package internal
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"os/exec"

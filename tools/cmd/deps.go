@@ -6,11 +6,24 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/cobra"
+	"wb09_tool/internal"
 )
 
-const repoPath = "/home/soda/STM32Cube/Repository/STM32Cube_FW_WB0_V1.4.0"
-const destInc = "Library/Inc"
-const destSrc = "Library/Src"
+var depsCmd = &cobra.Command{
+	Use:   "deps",
+	Short: "Scan sources and copy missing dependencies",
+	Run: func(cmd *cobra.Command, args []string) {
+		runDeps()
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(depsCmd)
+}
+
+var processedFiles = make(map[string]bool)
 
 // Directories to check before deciding a file is missing
 var includePaths = []string{
@@ -45,42 +58,20 @@ var knownSymbols = map[string]string{
 	"CPUcontextSave":       "cpu_context_switch.s",
 	"APP_DEBUG_SIGNAL_SET": "app_debug.c",
 	"RT_DEBUG_GPIO_Init":   "app_debug.c",
+    "HOST_TO_LE_16":        "ble_types.h", // Just in case
 }
 
-var processedFiles = make(map[string]bool)
-var foundSources = make(map[string]bool)
-
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil
-}
-
-func findInPaths(filename string, paths []string) string {
-	for _, p := range paths {
-		fullPath := filepath.Join(p, filename)
-		if fileExists(fullPath) {
-			return fullPath
+func runDeps() {
+	os.MkdirAll(internal.LibIncDir, 0755)
+	os.MkdirAll(internal.LibSrcDir, 0755)
+	
+	// Seed with existing source files in all source paths
+	for _, p := range sourcePaths {
+		files, _ := filepath.Glob(filepath.Join(p, "*.c"))
+		for _, f := range files {
+			scanFile(f)
 		}
 	}
-	return ""
-}
-
-func findFileInRepo(filename string) string {
-	var foundPath string
-	err := filepath.Walk(repoPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() && info.Name() == filename {
-			foundPath = path
-			return fmt.Errorf("Found") // Stop searching
-		}
-		return nil
-	})
-	if err != nil && err.Error() == "Found" {
-		return foundPath
-	}
-	return ""
 }
 
 func scanFile(path string) {
@@ -123,15 +114,15 @@ func processDependency(filename string) {
 	var checkPaths []string
 
 	if isHeader {
-		targetDir = destInc
+		targetDir = internal.LibIncDir
 		checkPaths = includePaths
 	} else {
-		targetDir = destSrc
+		targetDir = internal.LibSrcDir
 		checkPaths = sourcePaths
 	}
 
 	// Check if exists in paths
-	existingPath := findInPaths(filename, checkPaths)
+	existingPath := internal.FindInPaths(filename, checkPaths)
 	if existingPath != "" {
 		// Scan it for recursive includes/symbols
 		scanFile(existingPath)
@@ -139,10 +130,10 @@ func processDependency(filename string) {
 	}
 	
 	// Not found locally, search in Repo
-	path := findFileInRepo(filename)
+	path := internal.FindFileInRepo(internal.SDKPath, filename)
 	if path != "" {
 		fmt.Printf("Found missing dependency: %s -> Copying to %s\n", filename, targetDir)
-		copyFile(path, filepath.Join(targetDir, filename))
+		internal.CopyFile(path, filepath.Join(targetDir, filename))
 		
 		// Scan the new file
 		scanFile(filepath.Join(targetDir, filename))
@@ -151,44 +142,19 @@ func processDependency(filename string) {
 			// Check for associated .c file
 			cFile := strings.Replace(filename, ".h", ".c", 1)
 			// Check if .c file already exists or processed
-			if findInPaths(cFile, sourcePaths) == "" && !processedFiles[cFile] {
+			if internal.FindInPaths(cFile, sourcePaths) == "" && !processedFiles[cFile] {
 				// Search and copy associated .c file
 				cPath := filepath.Join(filepath.Dir(path), cFile)
-				if !fileExists(cPath) {
-					cPath = findFileInRepo(cFile)
+				if !internal.FileExists(cPath) {
+					cPath = internal.FindFileInRepo(internal.SDKPath, cFile)
 				}
 				if cPath != "" {
-					fmt.Printf("Found associated source: %s -> Copying to %s\n", cFile, destSrc)
-					copyFile(cPath, filepath.Join(destSrc, cFile))
+					fmt.Printf("Found associated source: %s -> Copying to %s\n", cFile, internal.LibSrcDir)
+					internal.CopyFile(cPath, filepath.Join(internal.LibSrcDir, cFile))
 					processedFiles[cFile] = true
-					scanFile(filepath.Join(destSrc, cFile))
+					scanFile(filepath.Join(internal.LibSrcDir, cFile))
 				}
 			}
-		}
-	}
-}
-
-func copyFile(src, dst string) {
-	input, err := os.ReadFile(src)
-	if err != nil {
-		fmt.Println("Error reading", src)
-		return
-	}
-	err = os.WriteFile(dst, input, 0644)
-	if err != nil {
-		fmt.Println("Error writing", dst)
-		return
-	}
-}
-
-func RunDeps() {
-	os.MkdirAll(destInc, 0755)
-	os.MkdirAll(destSrc, 0755)
-	// Seed with existing source files in all source paths
-	for _, p := range sourcePaths {
-		files, _ := filepath.Glob(filepath.Join(p, "*.c"))
-		for _, f := range files {
-			scanFile(f)
 		}
 	}
 }
