@@ -166,11 +166,28 @@ static const char a_GapDeviceName[] = {  'P', 'e', 'e', 'r', ' ', 't', 'o', ' ',
 /**
  * Advertising Data
  */
+/**
+ * Advertising Data (iBeacon)
+ */
 uint8_t a_AdvData[] =
 {
   2, AD_TYPE_FLAGS, FLAG_BIT_LE_GENERAL_DISCOVERABLE_MODE|FLAG_BIT_BR_EDR_NOT_SUPPORTED,
-  6, AD_TYPE_COMPLETE_LOCAL_NAME, 'S', 'T', 'M', '3', '2',  /* Complete name */
-  15, AD_TYPE_MANUFACTURER_SPECIFIC_DATA, 0x30, 0x00, 0x00 /*  */, 0x00 /*  */, 0x00 /*  */, 0x00 /*  */, 0x00 /*  */, 0x00 /*  */, 0x00 /*  */, 0x00 /*  */, 0x00 /*  */, 0x00 /*  */, 0x00 /*  */, 0x00 /*  */,
+  26, AD_TYPE_MANUFACTURER_SPECIFIC_DATA,
+  0x4C, 0x00, /* Apple CoID */
+  0x02, 0x15, /* iBeacon Type */
+  /* UUID: 00112233-4455-6677-8899-AABBCCDDEEFF */
+  0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF,
+  0x00, 0x01, /* Major */
+  0x00, 0x02, /* Minor */
+  0xC8        /* Tx Power (-56) */
+};
+
+/**
+ * Scan Response Data (Name)
+ */
+uint8_t scan_resp_data[] = {
+  6, AD_TYPE_COMPLETE_LOCAL_NAME, 'S', 'T', 'M', '3', '2'
 };
 
 /* USER CODE BEGIN PV */
@@ -1186,6 +1203,17 @@ void APP_BLE_Procedure_Gap_Peripheral(ProcGapPeripheralId_t ProcGapPeripheralId)
       else
       {
         APP_DBG_MSG("==>> Success: aci_gap_set_advertising_data\n");
+      }
+
+      /* Set Scan Response Data */
+      status = aci_gap_set_scan_response_data(0, sizeof(scan_resp_data), scan_resp_data);
+      if (status != BLE_STATUS_SUCCESS)
+      {
+        APP_DBG_MSG("==>> aci_gap_set_scan_response_data Failed, result: 0x%02X\n", status);
+      }
+      else
+      {
+        APP_DBG_MSG("==>> Success: aci_gap_set_scan_response_data\n");
       }
 
       /* Enable advertising */
