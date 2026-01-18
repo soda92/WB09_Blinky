@@ -9,12 +9,13 @@ import (
 )
 
 const repoPath = "/home/soda/STM32Cube/Repository/STM32Cube_FW_WB0_V1.4.0"
-const destInc = "Core/Inc"
-const destSrc = "Core/Src"
+const destInc = "Library/Inc"
+const destSrc = "Library/Src"
 
 // Directories to check before deciding a file is missing
 var includePaths = []string{
 	"Core/Inc",
+	"Library/Inc",
 	"STM32_BLE/App",
 	"STM32_BLE/Target",
 	"Drivers/STM32WB0x_HAL_Driver/Inc",
@@ -30,6 +31,7 @@ var includePaths = []string{
 
 var sourcePaths = []string{
 	"Core/Src",
+	"Library/Src",
 	"STM32_BLE/App",
 	"STM32_BLE/Target",
 	"Drivers/STM32WB0x_HAL_Driver/Src",
@@ -38,7 +40,14 @@ var sourcePaths = []string{
 	"Middlewares/ST/STM32_BLE/stack/config",
 }
 
-var processedHeaders = make(map[string]bool)
+var knownSymbols = map[string]string{
+	"blue_unit_conversion": "blue_unit_conversion.s",
+	"CPUcontextSave":       "cpu_context_switch.s",
+	"APP_DEBUG_SIGNAL_SET": "app_debug.c",
+	"RT_DEBUG_GPIO_Init":   "app_debug.c",
+}
+
+var processedFiles = make(map[string]bool)
 var foundSources = make(map[string]bool)
 
 func fileExists(path string) bool {
@@ -84,61 +93,77 @@ func scanFile(path string) {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
+		
+		// Check for Includes
 		if strings.HasPrefix(line, "#include") {
 			parts := strings.Split(line, "\"")
 			if len(parts) > 1 {
 				header := parts[1]
-				processHeader(header)
+				processDependency(header)
+			}
+		}
+
+		// Check for Known Symbols
+		for symbol, filename := range knownSymbols {
+			if strings.Contains(line, symbol) {
+				processDependency(filename)
 			}
 		}
 	}
 }
 
-func processHeader(header string) {
-	if processedHeaders[header] {
+func processDependency(filename string) {
+	if processedFiles[filename] {
 		return
 	}
-	processedHeaders[header] = true // Mark processed early to avoid cycles
+	processedFiles[filename] = true
 
-	// Check if exists in include paths
-	existingPath := findInPaths(header, includePaths)
+	isHeader := strings.HasSuffix(filename, ".h")
+	var targetDir string
+	var checkPaths []string
+
+	if isHeader {
+		targetDir = destInc
+		checkPaths = includePaths
+	} else {
+		targetDir = destSrc
+		checkPaths = sourcePaths
+	}
+
+	// Check if exists in paths
+	existingPath := findInPaths(filename, checkPaths)
 	if existingPath != "" {
-		// Scan it for recursive includes
+		// Scan it for recursive includes/symbols
 		scanFile(existingPath)
 		return
 	}
 	
 	// Not found locally, search in Repo
-	path := findFileInRepo(header)
+	path := findFileInRepo(filename)
 	if path != "" {
-		fmt.Printf("Found missing header: %s -> Copying to %s\n", header, destInc)
-		copyFile(path, filepath.Join(destInc, header))
+		fmt.Printf("Found missing dependency: %s -> Copying to %s\n", filename, targetDir)
+		copyFile(path, filepath.Join(targetDir, filename))
 		
-		// Scan the new header
-		scanFile(filepath.Join(destInc, header))
+		// Scan the new file
+		scanFile(filepath.Join(targetDir, filename))
 
-		// Check for associated .c file
-		cFile := strings.Replace(header, ".h", ".c", 1)
-		
-		// Check if .c file already exists in project source paths
-		if findInPaths(cFile, sourcePaths) != "" {
-			return
-		}
-
-		// Not found locally, search in Repo
-		// Check same dir as header first
-		cPath := filepath.Join(filepath.Dir(path), cFile)
-		if !fileExists(cPath) {
-			// Try finding globally in Repo
-			cPath = findFileInRepo(cFile)
-		}
-		
-		if cPath != "" && !foundSources[cFile] {
-			fmt.Printf("Found associated source: %s -> Copying to %s\n", cFile, destSrc)
-			copyFile(cPath, filepath.Join(destSrc, cFile))
-			foundSources[cFile] = true
-			// Scan the new source
-			scanFile(filepath.Join(destSrc, cFile))
+		if isHeader {
+			// Check for associated .c file
+			cFile := strings.Replace(filename, ".h", ".c", 1)
+			// Check if .c file already exists or processed
+			if findInPaths(cFile, sourcePaths) == "" && !processedFiles[cFile] {
+				// Search and copy associated .c file
+				cPath := filepath.Join(filepath.Dir(path), cFile)
+				if !fileExists(cPath) {
+					cPath = findFileInRepo(cFile)
+				}
+				if cPath != "" {
+					fmt.Printf("Found associated source: %s -> Copying to %s\n", cFile, destSrc)
+					copyFile(cPath, filepath.Join(destSrc, cFile))
+					processedFiles[cFile] = true
+					scanFile(filepath.Join(destSrc, cFile))
+				}
+			}
 		}
 	}
 }
@@ -157,6 +182,8 @@ func copyFile(src, dst string) {
 }
 
 func RunDeps() {
+	os.MkdirAll(destInc, 0755)
+	os.MkdirAll(destSrc, 0755)
 	// Seed with existing source files in all source paths
 	for _, p := range sourcePaths {
 		files, _ := filepath.Glob(filepath.Join(p, "*.c"))

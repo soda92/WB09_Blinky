@@ -37,6 +37,7 @@ BUILD_DIR = build
 # C sources
 C_SOURCES = \
   $(wildcard Core/Src/*.c) \
+  $(wildcard Library/Src/*.c) \
   $(wildcard STM32_BLE/App/*.c) \
   $(wildcard STM32_BLE/Target/*.c) \
   $(wildcard Drivers/STM32WB0x_HAL_Driver/Src/*.c) \
@@ -44,11 +45,13 @@ C_SOURCES = \
   $(wildcard Middlewares/ST/STM32_BLE/evt_handler/src/*.c) \
   $(wildcard Middlewares/ST/STM32_BLE/stack/config/*.c)
 
+# Remove templates
+C_SOURCES := $(filter-out %_template.c, $(C_SOURCES))
+
 # ASM sources
 ASM_SOURCES =  \
 startup_stm32wb09.s \
-Core/Src/blue_unit_conversion.s \
-Core/Src/cpu_context_switch.s
+$(wildcard Library/Src/*.s)
 
 # ASMM sources
 ASMM_SOURCES = 
@@ -108,6 +111,7 @@ AS_INCLUDES =
 # C includes
 C_INCLUDES =  \
 -ICore/Inc \
+-ILibrary/Inc \
 -ISTM32_BLE/App \
 -ISTM32_BLE/Target \
 -IDrivers/STM32WB0x_HAL_Driver/Inc \
@@ -206,8 +210,8 @@ flash: all
 	@echo "Done!"
 
 qflash:
-	@go build -o flash_tool flash_wrapper.go
-	@./flash_tool
+	@go build -o wb09_tool tools/main.go tools/deps.go tools/flash.go tools/setup.go
+	@./wb09_tool flash
 
 
 
