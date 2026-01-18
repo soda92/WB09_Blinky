@@ -56,9 +56,10 @@ var sourcePaths = []string{
 var knownSymbols = map[string]string{
 	"blue_unit_conversion": "blue_unit_conversion.s",
 	"CPUcontextSave":       "cpu_context_switch.s",
-	"APP_DEBUG_SIGNAL_SET": "app_debug.c",
-	"RT_DEBUG_GPIO_Init":   "app_debug.c",
-    "HOST_TO_LE_16":        "ble_types.h", // Just in case
+		"APP_DEBUG_SIGNAL_SET": "app_debug.c",
+		"RT_DEBUG_GPIO_Init":   "app_debug.c",
+		"UTIL_PowerDriver":     "stm32_lpm_if.c",
+		"HOST_TO_LE_16":        "ble_types.h", // Just in case
 }
 
 func runDeps() {
@@ -116,6 +117,7 @@ func scanFile(path string) {
 		// Check for Known Symbols
 		for symbol, filename := range knownSymbols {
 			if strings.Contains(line, symbol) {
+				// fmt.Printf("DEBUG: Found symbol %s in %s -> triggering %s\n", symbol, path, filename)
 				processDependency(filename)
 			}
 		}
@@ -129,6 +131,12 @@ func processDependency(filename string) {
 	processedFiles[filename] = true
 
 	isHeader := strings.HasSuffix(filename, ".h")
+
+	// Filter DTM sources (keep headers)
+	if !isHeader && (strings.Contains(filename, "dtm_") || strings.Contains(filename, "transport_layer") || strings.Contains(filename, "hci_parser")) {
+		return
+	}
+
 	var targetDir string
 	var checkPaths []string
 
@@ -160,20 +168,7 @@ func processDependency(filename string) {
 		if isHeader {
 			// Check for associated .c file
 			cFile := strings.Replace(filename, ".h", ".c", 1)
-			// Check if .c file already exists or processed
-			if internal.FindInPaths(cFile, sourcePaths) == "" && !processedFiles[cFile] {
-				// Search and copy associated .c file
-				cPath := filepath.Join(filepath.Dir(path), cFile)
-				if !internal.FileExists(cPath) {
-					cPath = internal.FindFileInRepo(internal.SDKPath, cFile)
-				}
-				if cPath != "" {
-					fmt.Printf("Found associated source: %s -> Copying to %s\n", cFile, internal.LibSrcDir)
-					internal.CopyFile(cPath, filepath.Join(internal.LibSrcDir, cFile))
-					processedFiles[cFile] = true
-					scanFile(filepath.Join(internal.LibSrcDir, cFile))
-				}
-			}
+			processDependency(cFile)
 		}
 	}
 }
