@@ -118,7 +118,20 @@ static tBleStatus IBeacon_Init(IBeacon_InitTypeDef *IBeacon_Init)
     return ret;
   }
   
-  ret = aci_gap_set_advertising_data(0, ADV_COMPLETE_DATA, sizeof(ibeacon_data), ibeacon_data);
+  /* Custom Data: Flags + Name "STM32" */
+  const char local_name[] = {AD_TYPE_COMPLETE_LOCAL_NAME, 'S', 'T', 'M', '3', '2'};
+  uint8_t adv_data[3 + sizeof(local_name) + 1];
+  
+  // Flags
+  adv_data[0] = 2;
+  adv_data[1] = AD_TYPE_FLAGS;
+  adv_data[2] = (FLAG_BIT_LE_GENERAL_DISCOVERABLE_MODE | FLAG_BIT_BR_EDR_NOT_SUPPORTED);
+
+  // Name
+  adv_data[3] = sizeof(local_name);
+  memcpy(&adv_data[4], local_name, sizeof(local_name));
+
+  ret = aci_gap_set_advertising_data(0, ADV_COMPLETE_DATA, sizeof(adv_data), adv_data);
   if (ret != BLE_STATUS_SUCCESS)
   {
     APP_DBG_MSG("Error in aci_gap_set_advertising_data() 0x%02x\r\n", ret);
@@ -138,7 +151,25 @@ static tBleStatus IBeacon_Init(IBeacon_InitTypeDef *IBeacon_Init)
   }
 
 /* USER CODE BEGIN IBeacon_Init_2 */
+/*
+  APP_DBG_MSG("Setting Scan Response Data...\n");
+  const char local_name[] = {AD_TYPE_COMPLETE_LOCAL_NAME, 'S', 'T', 'M', '3', '2'};
+  uint8_t scan_resp_data[1 + sizeof(local_name)];
+  scan_resp_data[0] = sizeof(local_name);
+  memcpy(&scan_resp_data[1], local_name, sizeof(local_name));
 
+  APP_DBG_MSG("Scan Resp Len: %d\n", scan_resp_data[0]);
+
+  ret = aci_gap_set_scan_response_data(0, sizeof(scan_resp_data), scan_resp_data);
+  if (ret != BLE_STATUS_SUCCESS)
+  {
+    APP_DBG_MSG("Error in aci_gap_set_scan_response_data() 0x%02x\r\n", ret);
+  }
+  else
+  {
+    APP_DBG_MSG("Scan Response Set Successfully.\n");
+  }
+*/
 /* USER CODE END IBeacon_Init_2 */
   return ret;
 }
@@ -146,7 +177,9 @@ static tBleStatus IBeacon_Init(IBeacon_InitTypeDef *IBeacon_Init)
 void IBeacon_Process(void)
 {
 /* USER CODE BEGIN IBeacon_Process_1 */
-
+  static uint8_t initialized = 0;
+  if (initialized) return;
+  initialized = 1;
 /* USER CODE END IBeacon_Process_1 */
   /* Default ibeacon */
   uint8_t UuID[]    = { UUID };

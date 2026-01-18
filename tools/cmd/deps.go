@@ -92,6 +92,9 @@ func runDeps() {
 		internal.ReplaceInFile(cpuPath, "../Modules/asm.h", "asm.h")
 		fmt.Println("Patched cpu_context_switch.s include path.")
 	}
+
+	// Always check/copy cryptolib_hw_aes.c as it is needed by libcrypto.a
+	processDependency("cryptolib_hw_aes.c")
 }
 
 func scanFile(path string) {

@@ -99,7 +99,17 @@ int main(void)
   MX_RADIO_TIMER_Init();
   MX_PKA_Init();
   /* USER CODE BEGIN 2 */
-
+  /* Initialize COM1 for debug */
+  COM_InitTypeDef com_init = {
+    .BaudRate = 115200,
+    .WordLength = COM_WORDLENGTH_8B,
+    .StopBits = COM_STOPBITS_1,
+    .Parity = COM_PARITY_NONE,
+    .HwFlowCtl = COM_HWCONTROL_NONE
+  };
+  BSP_COM_Init(COM1, &com_init);
+  
+  printf("Hello from STM32WB09!\r\n");
   /* USER CODE END 2 */
 
   /* Init code for STM32_BLE */
@@ -289,7 +299,12 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+/* Retarget printf to UART */
+int _write(int file, char *ptr, int len)
+{
+  HAL_UART_Transmit(&hcom_uart[COM1], (uint8_t*)ptr, len, 1000);
+  return len;
+}
 /* USER CODE END 4 */
 
 /**

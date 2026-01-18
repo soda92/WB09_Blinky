@@ -176,7 +176,7 @@ void BLE_Init(void)
   /**
    * Initialize GATT interface
    */
-  ret = aci_gatt_srv_profile_init(GATT_INIT_SERVICE_CHANGED_BIT, &gatt_service_changed_handle);
+  ret = aci_gatt_srv_profile_init(0, &gatt_service_changed_handle);
   if (ret != BLE_STATUS_SUCCESS)
   {
     APP_DBG_MSG("  Fail   : aci_gatt_srv_profile_init command, result: 0x%02X\n", ret);

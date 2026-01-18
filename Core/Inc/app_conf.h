@@ -58,13 +58,13 @@
 #define ADV_INTERVAL_MAX                    (0x00A0)
 #define ADV_LP_INTERVAL_MIN                 (0x0640)
 #define ADV_LP_INTERVAL_MAX                 (0x0FA0)
-#define ADV_TYPE                            (HCI_ADV_EVENT_PROP_LEGACY | HCI_ADV_EVENT_PROP_SCANNABLE)
+#define ADV_TYPE                            (HCI_ADV_EVENT_PROP_LEGACY | HCI_ADV_EVENT_PROP_CONNECTABLE | HCI_ADV_EVENT_PROP_SCANNABLE)
 #define ADV_FILTER                          HCI_ADV_FILTER_NONE
 
 /**
  * Define IO Authentication
  */
-#define CFG_BONDING_MODE                    (0)
+#define CFG_BONDING_MODE                    (1)
 #define CFG_FIXED_PIN                       (111111)
 #define CFG_ENCRYPTION_KEY_SIZE_MAX         (16)
 #define CFG_ENCRYPTION_KEY_SIZE_MIN         (8)
@@ -131,7 +131,7 @@
  * Maximum number of attributes that can be stored in the GATT database in addition to the attributes number already defined for the GATT and GAP services
  * (BLE_STACK_NUM_GATT_MANDATORY_ATTRIBUTES value on STM32_BLE middleware, ble_stack.h header file).
  */
-#define CFG_BLE_NUM_GATT_ATTRIBUTES                     (0)
+#define CFG_BLE_NUM_GATT_ATTRIBUTES                     (100)
 
 /**
  * Maximum number of concurrent Client's Procedures. This value must be less
@@ -165,7 +165,7 @@
  * Number of extra memory blocks, in addition to the minimum required for the
  * supported links.
  */
-#define CFG_BLE_MBLOCK_COUNT_MARGIN                     (0)
+#define CFG_BLE_MBLOCK_COUNT_MARGIN                     (100)
 
 /**
  * Maximum number of simultaneous EATT active channels. It must be less than or
@@ -189,7 +189,7 @@
  * Maximum number of Advertising Data Sets, if Advertising Extension Feature is
  * enabled.
  */
-#define CFG_BLE_NUM_ADV_SETS                            (3)
+#define CFG_BLE_NUM_ADV_SETS                            (1)
 
 /**
  * Maximum number of Periodic Advertising with Responses subevents.
@@ -348,7 +348,7 @@
 #define CFG_BLE_CONTROLLER_PERIODIC_ADV_WR_ENABLED        (0U)
 #define CFG_BLE_CONTROLLER_CTE_ENABLED                    (0U)
 #define CFG_BLE_CONTROLLER_POWER_CONTROL_ENABLED          (0U)
-#define CFG_BLE_CONNECTION_ENABLED                        (0U)
+#define CFG_BLE_CONNECTION_ENABLED                        (1U)
 #define CFG_BLE_CONTROLLER_CHAN_CLASS_ENABLED             (0U)
 #define CFG_BLE_CONTROLLER_BIS_ENABLED                    (0U)
 #define CFG_BLE_CONNECTION_SUBRATING_ENABLED              (0U)

@@ -38,7 +38,17 @@ var monitorCmd = &cobra.Command{
 			}
 		}
 
-		c := exec.Command("timeout", "10s", "picocom", "-b", baud, "-q", port)
+		// Reset board to capture startup logs
+		fmt.Println("Resetting board...")
+		progCmd := exec.Command("/home/soda/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI", "-c", "port=SWD", "-rst")
+		if err := progCmd.Run(); err != nil {
+			fmt.Printf("Warning: Failed to reset board: %v\n", err)
+		}
+
+		// Configure stty
+		exec.Command("stty", "-F", port, baud, "raw", "-echo").Run()
+
+		c := exec.Command("timeout", "10s", "cat", port)
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr
 		
