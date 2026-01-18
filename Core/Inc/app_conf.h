@@ -373,7 +373,7 @@
 
 #define CFG_FULL_LOW_POWER       (0)
 
-#define CFG_LPM_SUPPORTED        (1)
+#define CFG_LPM_SUPPORTED        (0)
 
 #define CFG_LPM_EMULATED         (0)
 
@@ -382,7 +382,7 @@
  */
 #if (CFG_FULL_LOW_POWER == 1)
   #undef CFG_LPM_SUPPORTED
-  #define CFG_LPM_SUPPORTED      (1)
+  #define CFG_LPM_SUPPORTED      (0)
 #endif /* CFG_FULL_LOW_POWER */
 
 /* USER CODE BEGIN Low_Power 0 */
