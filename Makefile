@@ -5,7 +5,7 @@
 # ------------------------------------------------
 # Generic Makefile (based on gcc)
 #
-# ChangeLog :
+# ChangeLog : 
 #	2017-02-10 - Several enhancements + project update mode
 #   2015-07-22 - first version
 # ------------------------------------------------
@@ -35,58 +35,20 @@ BUILD_DIR = build
 # source
 ######################################
 # C sources
-C_SOURCES =  \
-Core/Src/main.c \
-Core/Src/stm32wb0x_it.c \
-Core/Src/stm32wb0x_hal_msp.c \
-Drivers/BSP/STM32WB0x-nucleo/stm32wb0x_nucleo.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_cortex.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_rcc.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_rcc_ex.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_flash.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_flash_ex.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_gpio.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_dma.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_pwr.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_pwr_ex.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_usart.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_usart_ex.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_uart_ex.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_uart.c \
-Core/Src/system_stm32wb0x.c \
-Core/Src/sysmem.c \
-Core/Src/syscalls.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_adc.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_pka.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_radio.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_radio_timer.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_rng.c \
-Middlewares/ST/STM32_BLE/evt_handler/src/ble_evt.c \
-Middlewares/ST/STM32_BLE/stack/config/ble_stack_user_cfg.c \
-Core/Src/app_ble.c \
-Core/Src/bleplat.c \
-Core/Src/pka_manager.c \
-Core/Src/hw_aes.c \
-Core/Src/hw_rng.c \
-Core/Src/bleplat_cntr.c \
-Core/Src/miscutil.c \
-Core/Src/osal.c \
-Core/Src/RADIO_utils.c \
-Core/Src/stm32wb0x_ll_adc.c \
-Core/Src/stm32wb0x_ll_dma.c \
-Core/Src/stm32wb0x_ll_gpio.c \
-Core/Src/stm32wb0x_ll_pwr.c \
-Core/Src/stm32wb0x_ll_rcc.c \
-Core/Src/stm32wb0x_ll_rng.c \
-Core/Src/stm32wb0x_ll_system.c \
-Core/Src/stm32wb0x_ll_usart.c \
-Core/Src/stm32wb0x_ll_utils.c
+C_SOURCES = \
+  $(wildcard Core/Src/*.c) \
+  $(wildcard STM32_BLE/App/*.c) \
+  $(wildcard STM32_BLE/Target/*.c) \
+  $(wildcard Drivers/STM32WB0x_HAL_Driver/Src/*.c) \
+  $(wildcard Drivers/BSP/STM32WB0x-nucleo/*.c) \
+  $(wildcard Middlewares/ST/STM32_BLE/evt_handler/src/*.c) \
+  $(wildcard Middlewares/ST/STM32_BLE/stack/config/*.c)
 
 # ASM sources
 ASM_SOURCES =  \
 startup_stm32wb09.s \
-Core/Src/blue_unit_conversion.s
+Core/Src/blue_unit_conversion.s \
+Core/Src/cpu_context_switch.s
 
 # ASMM sources
 ASMM_SOURCES = 
@@ -135,6 +97,7 @@ AS_DEFS =
 # C defines
 C_DEFS =  \
 -DUSE_NUCLEO_32 \
+-DNUCLEO_WB09KE \
 -DUSE_HAL_DRIVER \
 -DSTM32WB09
 
@@ -145,6 +108,8 @@ AS_INCLUDES =
 # C includes
 C_INCLUDES =  \
 -ICore/Inc \
+-ISTM32_BLE/App \
+-ISTM32_BLE/Target \
 -IDrivers/STM32WB0x_HAL_Driver/Inc \
 -IDrivers/STM32WB0x_HAL_Driver/Inc/Legacy \
 -IDrivers/BSP/STM32WB0x-nucleo \
@@ -214,9 +179,8 @@ $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	
 $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	$(BIN) $< $@	
-	
 $(BUILD_DIR):
-	mkdir $@		
+	mkdir $@	
 
 #######################################
 # clean up
@@ -248,5 +212,3 @@ qflash:
 
 
 # *** EOF ***
-
-

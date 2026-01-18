@@ -1,2 +1,6 @@
 /build
 /flash_tool
+Drivers/
+Middlewares/
+STM32_BLE
+/Core
