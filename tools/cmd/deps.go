@@ -72,6 +72,25 @@ func runDeps() {
 			scanFile(f)
 		}
 	}
+
+	// Patch osal.c if it exists
+	osalPath := filepath.Join(internal.LibSrcDir, "osal.c")
+	if internal.FileExists(osalPath) {
+		content := "\nvoid Osal_MemCpy(void *dest, const void *src, unsigned int size) {\n    memcpy(dest, src, size);\n}\n\nvoid Osal_MemSet(void *ptr, int value, unsigned int size) {\n    memset(ptr, value, size);\n}\n\nint Osal_MemCmp(const void *ptr1, const void *ptr2, unsigned int size) {\n    return memcmp(ptr1, ptr2, size);\n}\n"
+		// Check if already patched
+		existing, _ := os.ReadFile(osalPath)
+		if !strings.Contains(string(existing), "Osal_MemCpy(void") {
+			internal.AppendToFile(osalPath, content)
+			fmt.Println("Patched osal.c with missing functions.")
+		}
+	}
+
+	// Patch cpu_context_switch.s
+	cpuPath := filepath.Join(internal.LibSrcDir, "cpu_context_switch.s")
+	if internal.FileExists(cpuPath) {
+		internal.ReplaceInFile(cpuPath, "../Modules/asm.h", "asm.h")
+		fmt.Println("Patched cpu_context_switch.s include path.")
+	}
 }
 
 func scanFile(path string) {
