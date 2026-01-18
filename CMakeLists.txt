@@ -79,5 +79,15 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex
     COMMAND ${CMAKE_OBJCOPY} -O binary -S $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin
     COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${PROJECT_NAME}>
-    COMMENT "Building hex and bin files"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_SOURCE_DIR}/compile_commands.json
+    COMMENT "Building hex, bin files and copying compile_commands.json"
+)
+
+# Flash Target
+set(STM32_PROG "/home/soda/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI")
+add_custom_target(flash
+    COMMAND ${STM32_PROG} -c port=SWD -w ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin 0x10040000 -v -rst
+    DEPENDS ${PROJECT_NAME}
+    COMMENT "Flashing via STM32CubeProgrammer..."
+    USES_TERMINAL
 )

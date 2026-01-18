@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"strings"
 	"sync"
 
 	"github.com/spf13/cobra"
@@ -14,7 +13,7 @@ import (
 
 var flashCmd = &cobra.Command{
 	Use:   "flash",
-	Short: "Build and Flash the project",
+	Short: "Build and Flash the project using CMake and Ninja",
 	Run: func(cmd *cobra.Command, args []string) {
 		runFlash()
 	},
@@ -25,7 +24,19 @@ func init() {
 }
 
 func runFlash() {
-	cmd := exec.Command("make", "flash")
+	// 1. Configure if needed (check for build/build.ninja)
+	if _, err := os.Stat("build/build.ninja"); os.IsNotExist(err) {
+		fmt.Println("Configuring CMake with Ninja...")
+		runCommand("cmake", "-DCMAKE_TOOLCHAIN_FILE=cmake/arm-none-eabi-gcc.cmake", "-G", "Ninja", "-B", "build", "-S", ".")
+	}
+
+	// 2. Build and Flash
+	fmt.Println("Building and Flashing...")
+	runCommand("cmake", "--build", "build", "--target", "flash")
+}
+
+func runCommand(name string, args ...string) {
+	cmd := exec.Command(name, args...)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -50,31 +61,7 @@ func runFlash() {
 		defer wg.Done()
 		scanner := bufio.NewScanner(r)
 		for scanner.Scan() {
-			line := scanner.Text()
-			cleanLine := strings.TrimSpace(line)
-
-			// Heuristic to detect compiler commands
-			isCompilerCmd := strings.HasPrefix(cleanLine, "arm-none-eabi-gcc") ||
-				strings.HasPrefix(cleanLine, "arm-none-eabi-objcopy") ||
-				strings.HasPrefix(cleanLine, "arm-none-eabi-size") ||
-				strings.HasPrefix(cleanLine, "mkdir") || 
-				strings.HasPrefix(cleanLine, "rm -")
-
-			// Always show errors and warnings
-			isErrorOrWarning := strings.Contains(strings.ToLower(line), "error:") ||
-				strings.Contains(strings.ToLower(line), "warning:")
-
-			// Always show our custom echo messages and Programmer output headers
-			isEssential := strings.Contains(line, "Flashing via") ||
-				strings.Contains(line, "Done!") ||
-				strings.Contains(line, "ST-LINK SN") ||
-				strings.Contains(line, "Device name") ||
-				strings.Contains(line, "Flash size") ||
-				strings.Contains(line, "Download verified successfully")
-
-			if isErrorOrWarning || isEssential || !isCompilerCmd {
-				fmt.Println(line)
-			}
+			fmt.Println(scanner.Text())
 		}
 	}
 
@@ -83,7 +70,7 @@ func runFlash() {
 
 	wg.Wait()
 	if err := cmd.Wait(); err != nil {
-		// Just exit with the same code if possible, or 1
+		// Exit with error code if the command failed
 		os.Exit(1)
 	}
 }
