@@ -1,40 +1,41 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file    app_entry.c
-  * @author  GPM WBL Application Team
-  * @brief   Entry point of the application
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    app_entry.c
+ * @author  GPM WBL Application Team
+ * @brief   Entry point of the application
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2024 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
-#include "app_common.h"
-#include "main.h"
-#include "stm32_seq.h"
 #include "app_ble.h"
-#include "hw_rng.h"
+#include "app_common.h"
+#include "ble_stack.h"
 #include "hw_aes.h"
 #include "hw_pka.h"
+#include "hw_rng.h"
+#include "main.h"
+#include "stm32_seq.h"
 #include "stm32wb0x.h"
 #include "stm32wb0x_ll_usart.h"
-#include "ble_stack.h"
 #if (CFG_LPM_SUPPORTED == 1)
 #include "stm32_lpm.h"
 #endif /* CFG_LPM_SUPPORTED */
 #include "app_debug.h"
 
-/* Private includes -----------------------------------------------------------*/
+/* Private includes
+ * -----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -43,11 +44,10 @@
 
 /* USER CODE BEGIN PTD */
 #if (CFG_BUTTON_SUPPORTED == 1)
-typedef struct
-{
-  Button_TypeDef      button;
-  VTIMER_HandleType   longTimerId;
-  uint8_t             longPressed;
+typedef struct {
+  Button_TypeDef button;
+  VTIMER_HandleType longTimerId;
+  uint8_t longPressed;
 } ButtonDesc_t;
 #endif /* (CFG_BUTTON_SUPPORTED == 1) */
 /* USER CODE END PTD */
@@ -56,11 +56,11 @@ typedef struct
 
 /* USER CODE BEGIN PD */
 #if (CFG_BUTTON_SUPPORTED == 1)
-#define BUTTON_LONG_PRESS_THRESHOLD_MS   (500u)
-#define BUTTON_NB_MAX                    (B3 + 1u)
+#define BUTTON_LONG_PRESS_THRESHOLD_MS (500u)
+#define BUTTON_NB_MAX (B3 + 1u)
 #endif
 /* Section specific to button management using UART */
-#define C_SIZE_CMD_STRING       256U
+#define C_SIZE_CMD_STRING 256U
 
 /* USER CODE END PD */
 
@@ -100,7 +100,7 @@ static void Button_TriggerActions(void *arg);
 #endif
 /* Section specific to button management using UART */
 static void RxUART_Init(void);
-//static void RxCpltCallback(uint8_t * pRxDataBuff, uint16_t nDataSize);
+// static void RxCpltCallback(uint8_t * pRxDataBuff, uint16_t nDataSize);
 static void UartCmdExecute(void);
 /* USER CODE END PFP */
 
@@ -112,8 +112,7 @@ static void UartCmdExecute(void);
 
 /* Functions Definition ------------------------------------------------------*/
 
-uint32_t MX_APPE_Init(void *p_param)
-{
+uint32_t MX_APPE_Init(void *p_param) {
 
   UNUSED(p_param);
 
@@ -132,26 +131,22 @@ uint32_t MX_APPE_Init(void *p_param)
 #if (CFG_BUTTON_SUPPORTED == 1)
   Button_Init();
 #endif
-  
+
 #if (CFG_DEBUG_APP_TRACE != 0) && (CFG_DEBUG_APP_ADV_TRACE == 0)
-  COM_InitTypeDef COM_Init = 
-  {
-   .BaudRate = 115200,
-   .WordLength= COM_WORDLENGTH_8B,
-   .StopBits = COM_STOPBITS_1,
-   .Parity = COM_PARITY_NONE,
-   .HwFlowCtl = COM_HWCONTROL_NONE
-  };
+  COM_InitTypeDef COM_Init = {.BaudRate = 115200,
+                              .WordLength = COM_WORDLENGTH_8B,
+                              .StopBits = COM_STOPBITS_1,
+                              .Parity = COM_PARITY_NONE,
+                              .HwFlowCtl = COM_HWCONTROL_NONE};
   BSP_COM_Init(COM1, &COM_Init);
-  
-#endif  
-  
+
+#endif
+
   RxUART_Init();
-  
+
   /* USER CODE END APPE_Init_1 */
 
-  if (HW_RNG_Init() != HW_RNG_SUCCESS)
-  {
+  if (HW_RNG_Init() != HW_RNG_SUCCESS) {
     Error_Handler();
   }
 
@@ -164,9 +159,9 @@ uint32_t MX_APPE_Init(void *p_param)
   /* Low Power Manager Init */
   UTIL_LPM_Init();
 #endif /* CFG_LPM_SUPPORTED */
-/* USER CODE BEGIN APPE_Init_2 */
+       /* USER CODE BEGIN APPE_Init_2 */
 
-/* USER CODE END APPE_Init_2 */
+  /* USER CODE END APPE_Init_2 */
   APP_DEBUG_SIGNAL_RESET(APP_APPE_INIT);
   return BLE_STATUS_SUCCESS;
 }
@@ -174,21 +169,18 @@ uint32_t MX_APPE_Init(void *p_param)
 /* USER CODE BEGIN FD */
 #if (CFG_BUTTON_SUPPORTED == 1)
 /**
- * @brief   Indicate if the selected button was pressedn during a 'long time' or not.
+ * @brief   Indicate if the selected button was pressedn during a 'long time' or
+ * not.
  *
  * @param   btnIdx    Button to test, listed in enum Button_TypeDef
  * @return  '1' if pressed during a 'long time', else '0'.
  */
-uint8_t APPE_ButtonIsLongPressed(uint16_t btnIdx)
-{
+uint8_t APPE_ButtonIsLongPressed(uint16_t btnIdx) {
   uint8_t pressStatus;
 
-  if ( btnIdx < BUTTON_NB_MAX )
-  {
+  if (btnIdx < BUTTON_NB_MAX) {
     pressStatus = buttonDesc[btnIdx].longPressed;
-  }
-  else
-  {
+  } else {
     pressStatus = 0;
   }
 
@@ -200,27 +192,21 @@ uint8_t APPE_ButtonIsLongPressed(uint16_t btnIdx)
  * @param  None
  * @retval None
  */
-__WEAK void APPE_Button1Action(void)
-{
-}
+__WEAK void APPE_Button1Action(void) {}
 
 /**
  * @brief  Action of button 2 when pressed, to be implemented by user.
  * @param  None
  * @retval None
  */
-__WEAK void APPE_Button2Action(void)
-{
-}
+__WEAK void APPE_Button2Action(void) {}
 
 /**
  * @brief  Action of button 3 when pressed, to be implemented by user.
  * @param  None
  * @retval None
  */
-__WEAK void APPE_Button3Action(void)
-{
-}
+__WEAK void APPE_Button3Action(void) {}
 #endif
 
 /* USER CODE END FD */
@@ -231,8 +217,7 @@ __WEAK void APPE_Button3Action(void)
  *
  *************************************************************/
 #if (CFG_LPM_SUPPORTED == 1)
-static PowerSaveLevels App_PowerSaveLevel_Check(void)
-{
+static PowerSaveLevels App_PowerSaveLevel_Check(void) {
   PowerSaveLevels output_level = POWER_SAVE_LEVEL_STOP;
 
   /* USER CODE BEGIN App_PowerSaveLevel_Check_1 */
@@ -245,8 +230,7 @@ static PowerSaveLevels App_PowerSaveLevel_Check(void)
 
 /* USER CODE BEGIN FD_LOCAL_FUNCTIONS */
 #if (CFG_LED_SUPPORTED == 1)
-static void Led_Init( void )
-{
+static void Led_Init(void) {
   /* Leds Initialization */
   BSP_LED_Init(LED_BLUE);
   BSP_LED_Init(LED_GREEN);
@@ -259,8 +243,7 @@ static void Led_Init( void )
 #endif
 
 #if (CFG_BUTTON_SUPPORTED == 1)
-static void Button_Init( void )
-{
+static void Button_Init(void) {
   /* Button Initialization */
   buttonDesc[B1].button = B1;
   buttonDesc[B2].button = B2;
@@ -268,7 +251,7 @@ static void Button_Init( void )
   BSP_PB_Init(B1, BUTTON_MODE_EXTI);
   BSP_PB_Init(B2, BUTTON_MODE_EXTI);
   BSP_PB_Init(B3, BUTTON_MODE_EXTI);
-  
+
 #if (CFG_LPM_SUPPORTED == 1)
   HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PA0, PWR_WUP_FALLEDG);
   HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PB5, PWR_WUP_FALLEDG);
@@ -276,9 +259,9 @@ static void Button_Init( void )
   HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PB9, PWR_WUP_FALLEDG);
 #else
   HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PB14, PWR_WUP_FALLEDG);
-#endif  
-#endif  
-  
+#endif
+#endif
+
   /* Register tasks associated to buttons */
   UTIL_SEQ_RegTask(1U << TASK_BUTTON_1, UTIL_SEQ_RFU, APPE_Button1Action);
   UTIL_SEQ_RegTask(1U << TASK_BUTTON_2, UTIL_SEQ_RFU, APPE_Button2Action);
@@ -286,35 +269,32 @@ static void Button_Init( void )
 
   /* Create timers to detect button long press (one for each button) */
   Button_TypeDef buttonIndex;
-  for ( buttonIndex = B1; buttonIndex < BUTTON_NB_MAX; buttonIndex++ )
-  {
+  for (buttonIndex = B1; buttonIndex < BUTTON_NB_MAX; buttonIndex++) {
     buttonDesc[buttonIndex].longTimerId.callback = Button_TriggerActions;
     buttonDesc[buttonIndex].longTimerId.userData = &buttonDesc[buttonIndex];
   }
-  
+
   return;
 }
 
-static void Button_TriggerActions(void *arg)
-{
+static void Button_TriggerActions(void *arg) {
   ButtonDesc_t *p_buttonDesc = ((VTIMER_HandleType *)arg)->userData;
 
   p_buttonDesc->longPressed = BSP_PB_GetState(p_buttonDesc->button);
 
   APP_DBG_MSG("Button %d pressed\n", (p_buttonDesc->button + 1));
-  switch (p_buttonDesc->button)
-  {
-    case B1:
-      UTIL_SEQ_SetTask(1U << TASK_BUTTON_1, CFG_SEQ_PRIO_0);
-      break;
-    case B2:
-      UTIL_SEQ_SetTask(1U << TASK_BUTTON_2, CFG_SEQ_PRIO_0);
-      break;
-    case B3:
-      UTIL_SEQ_SetTask(1U << TASK_BUTTON_3, CFG_SEQ_PRIO_0);
-      break;
-    default:
-      break;
+  switch (p_buttonDesc->button) {
+  case B1:
+    UTIL_SEQ_SetTask(1U << TASK_BUTTON_1, CFG_SEQ_PRIO_0);
+    break;
+  case B2:
+    UTIL_SEQ_SetTask(1U << TASK_BUTTON_2, CFG_SEQ_PRIO_0);
+    break;
+  case B3:
+    UTIL_SEQ_SetTask(1U << TASK_BUTTON_3, CFG_SEQ_PRIO_0);
+    break;
+  default:
+    break;
   }
 
   return;
@@ -322,11 +302,10 @@ static void Button_TriggerActions(void *arg)
 
 #endif
 
-static void RxUART_Init(void)
-{
+static void RxUART_Init(void) {
   /* Enable the RX not empty interrupt */
   LL_USART_EnableIT_RXNE(USART1);
-  
+
   /* Enable the UART IRQ */
   NVIC_SetPriority(USART1_IRQn, IRQ_HIGH_PRIORITY);
   NVIC_EnableIRQ(USART1_IRQn);
@@ -335,14 +314,11 @@ static void RxUART_Init(void)
 #endif
 }
 
-void UartRxCpltCallback(uint8_t * pRxDataBuff, uint16_t nDataSize)
-{
+void UartRxCpltCallback(uint8_t *pRxDataBuff, uint16_t nDataSize) {
   // Loop in case nDataSize > 1 (always 1 in current implementation).
   /* Filling buffer and wait for '\r' char */
-  if (indexReceiveChar < C_SIZE_CMD_STRING)
-  {
-    if (*pRxDataBuff == '\r')
-    {
+  if (indexReceiveChar < C_SIZE_CMD_STRING) {
+    if (*pRxDataBuff == '\r') {
       APP_DBG_MSG("received %s\n", CommandString);
 
       UartCmdExecute();
@@ -350,67 +326,51 @@ void UartRxCpltCallback(uint8_t * pRxDataBuff, uint16_t nDataSize)
       /* Clear receive buffer and character counter*/
       indexReceiveChar = 0;
       memset(CommandString, 0, C_SIZE_CMD_STRING);
-    }
-    else
-    {
+    } else {
       CommandString[indexReceiveChar++] = *pRxDataBuff;
     }
   }
 }
 
-static void UartCmdExecute(void)
-{
+static void UartCmdExecute(void) {
   /* Parse received CommandString */
-  if(strcmp((char const*)CommandString, "SW1") == 0)
-  {
+  if (strcmp((char const *)CommandString, "SW1") == 0) {
     APP_DBG_MSG("SW1 OK\n");
 #if (CFG_BUTTON_SUPPORTED == 1)
     buttonDesc[B1].longPressed = 0;
     UTIL_SEQ_SetTask(1U << TASK_BUTTON_1, CFG_SEQ_PRIO_0);
 #endif
-  }
-  else if (strcmp((char const*)CommandString, "SW2") == 0)
-  {
+  } else if (strcmp((char const *)CommandString, "SW2") == 0) {
     APP_DBG_MSG("SW2 OK\n");
 #if (CFG_BUTTON_SUPPORTED == 1)
     buttonDesc[B2].longPressed = 0;
     UTIL_SEQ_SetTask(1U << TASK_BUTTON_2, CFG_SEQ_PRIO_0);
 #endif
-  }
-  else if (strcmp((char const*)CommandString, "SW3") == 0)
-  {
+  } else if (strcmp((char const *)CommandString, "SW3") == 0) {
     APP_DBG_MSG("SW3 OK\n");
 #if (CFG_BUTTON_SUPPORTED == 1)
     buttonDesc[B3].longPressed = 0;
     UTIL_SEQ_SetTask(1U << TASK_BUTTON_3, CFG_SEQ_PRIO_0);
 #endif
-  }
-  else if(strcmp((char const*)CommandString, "SW1_LONG") == 0)
-  {
+  } else if (strcmp((char const *)CommandString, "SW1_LONG") == 0) {
     APP_DBG_MSG("SW1_LONG OK\n");
 #if (CFG_BUTTON_SUPPORTED == 1)
     buttonDesc[B1].longPressed = 1;
     UTIL_SEQ_SetTask(1U << TASK_BUTTON_1, CFG_SEQ_PRIO_0);
 #endif
-  }
-  else if (strcmp((char const*)CommandString, "SW2_LONG") == 0)
-  {
+  } else if (strcmp((char const *)CommandString, "SW2_LONG") == 0) {
     APP_DBG_MSG("SW2_LONG OK\n");
 #if (CFG_BUTTON_SUPPORTED == 1)
     buttonDesc[B2].longPressed = 1;
     UTIL_SEQ_SetTask(1U << TASK_BUTTON_2, CFG_SEQ_PRIO_0);
 #endif
-  }
-  else if (strcmp((char const*)CommandString, "SW3_LONG") == 0)
-  {
+  } else if (strcmp((char const *)CommandString, "SW3_LONG") == 0) {
     APP_DBG_MSG("SW3_LONG OK\n");
 #if (CFG_BUTTON_SUPPORTED == 1)
     buttonDesc[B3].longPressed = 1;
     UTIL_SEQ_SetTask(1U << TASK_BUTTON_3, CFG_SEQ_PRIO_0);
 #endif
-  }
-  else
-  {
+  } else {
     APP_DBG_MSG("NOT RECOGNIZED COMMAND : %s\n", CommandString);
   }
 }
@@ -422,8 +382,7 @@ static void UartCmdExecute(void)
  * WRAP FUNCTIONS
  *
  *************************************************************/
-void MX_APPE_Process(void)
-{
+void MX_APPE_Process(void) {
   /* USER CODE BEGIN MX_APPE_Process_1 */
 
   /* USER CODE END MX_APPE_Process_1 */
@@ -432,8 +391,7 @@ void MX_APPE_Process(void)
 
   /* USER CODE END MX_APPE_Process_2 */
 }
-void UTIL_SEQ_PreIdle( void )
-{
+void UTIL_SEQ_PreIdle(void) {
 #if (CFG_LPM_SUPPORTED == 1)
   /* USER CODE BEGIN UTIL_SEQ_PREIDLE */
 
@@ -442,31 +400,30 @@ void UTIL_SEQ_PreIdle( void )
   return;
 }
 
-void UTIL_SEQ_Idle( void )
-{
+void UTIL_SEQ_Idle(void) {
 #if (CFG_LPM_SUPPORTED == 1)
 
   /* Need to consume some CSTACK on WB05, due to bootloader CSTACK usage. */
   volatile uint32_t dummy[15];
   uint8_t i;
-  for (i=0; i<10; i++)
-  {
+  for (i = 0; i < 10; i++) {
     dummy[i] = 0;
     __NOP();
   }
 
-  PowerSaveLevels app_powerSave_level, vtimer_powerSave_level, final_level, pka_level;
+  PowerSaveLevels app_powerSave_level, vtimer_powerSave_level, final_level,
+      pka_level;
 
   if ((BLE_STACK_SleepCheck() != POWER_SAVE_LEVEL_RUNNING) &&
-      ((app_powerSave_level = App_PowerSaveLevel_Check()) != POWER_SAVE_LEVEL_RUNNING))
-  {
+      ((app_powerSave_level = App_PowerSaveLevel_Check()) !=
+       POWER_SAVE_LEVEL_RUNNING)) {
     vtimer_powerSave_level = HAL_RADIO_TIMER_PowerSaveLevelCheck();
-    pka_level = (PowerSaveLevels) HW_PKA_PowerSaveLevelCheck();
-    final_level = (PowerSaveLevels)MIN(vtimer_powerSave_level, app_powerSave_level);
+    pka_level = (PowerSaveLevels)HW_PKA_PowerSaveLevelCheck();
+    final_level =
+        (PowerSaveLevels)MIN(vtimer_powerSave_level, app_powerSave_level);
     final_level = (PowerSaveLevels)MIN(pka_level, final_level);
 
-    switch(final_level)
-    {
+    switch (final_level) {
     case POWER_SAVE_LEVEL_RUNNING:
       /* Not Power Save device is busy */
       return;
@@ -485,68 +442,56 @@ void UTIL_SEQ_Idle( void )
       break;
     }
 
-  /* USER CODE BEGIN UTIL_SEQ_IDLE_BEGIN */
+    /* USER CODE BEGIN UTIL_SEQ_IDLE_BEGIN */
 
-  /* USER CODE END UTIL_SEQ_IDLE_BEGIN */
+    /* USER CODE END UTIL_SEQ_IDLE_BEGIN */
 
     UTIL_LPM_EnterLowPower();
 
-  /* USER CODE BEGIN UTIL_SEQ_IDLE_END */
+    /* USER CODE BEGIN UTIL_SEQ_IDLE_END */
 
-  /* USER CODE END UTIL_SEQ_IDLE_END */
+    /* USER CODE END UTIL_SEQ_IDLE_END */
   }
 #endif /* CFG_LPM_SUPPORTED */
 }
 
 /* USER CODE BEGIN FD_WRAP_FUNCTIONS */
 #if (CFG_BUTTON_SUPPORTED == 1)
-void BSP_PB_Callback(Button_TypeDef Button)
-{
+void BSP_PB_Callback(Button_TypeDef Button) {
   buttonDesc[Button].longPressed = 0;
-  HAL_RADIO_TIMER_StartVirtualTimer(&buttonDesc[Button].longTimerId, BUTTON_LONG_PRESS_THRESHOLD_MS);
+  HAL_RADIO_TIMER_StartVirtualTimer(&buttonDesc[Button].longTimerId,
+                                    BUTTON_LONG_PRESS_THRESHOLD_MS);
 
   return;
 }
 
 #if (CFG_LPM_SUPPORTED == 1)
-void HAL_PWR_WKUPx_Callback(uint32_t wakeupIOs)
-{
-  if (wakeupIOs & PWR_WAKEUP_PA0)
-  {
+void HAL_PWR_WKUPx_Callback(uint32_t wakeupIOs) {
+  if (wakeupIOs & PWR_WAKEUP_PA0) {
     BSP_PB_Callback(B1);
   }
-  if (wakeupIOs & PWR_WAKEUP_PB5)
-  {
+  if (wakeupIOs & PWR_WAKEUP_PB5) {
     BSP_PB_Callback(B2);
   }
 
 #if defined(STM32WB06) || defined(STM32WB07)
-  if (wakeupIOs & PWR_WAKEUP_PB9)
-  {
+  if (wakeupIOs & PWR_WAKEUP_PB9) {
     BSP_PB_Callback(B3);
   }
 #else
-  if (wakeupIOs & PWR_WAKEUP_PB14)
-  {
+  if (wakeupIOs & PWR_WAKEUP_PB14) {
     BSP_PB_Callback(B3);
   }
 #endif
-
 }
 #endif
 
-void HAL_GPIO_EXTI_Callback(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin)
-{
-  if (GPIO_Pin == B1_PIN)
-  {
+void HAL_GPIO_EXTI_Callback(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin) {
+  if (GPIO_Pin == B1_PIN) {
     BSP_PB_Callback(B1);
-  }
-  else if (GPIO_Pin == B2_PIN)
-  {
+  } else if (GPIO_Pin == B2_PIN) {
     BSP_PB_Callback(B2);
-  }
-  else if (GPIO_Pin == B3_PIN)
-  {
+  } else if (GPIO_Pin == B3_PIN) {
     BSP_PB_Callback(B3);
   }
 

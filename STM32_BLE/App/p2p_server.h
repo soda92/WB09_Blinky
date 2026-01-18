@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file    p2p_server.h
-  * @author  MCD Application Team
-  * @brief   Header for p2p_server.c
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    p2p_server.h
+ * @author  MCD Application Team
+ * @brief   Header for p2p_server.c
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2024 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
@@ -38,8 +38,7 @@ extern "C" {
 /* USER CODE END ED */
 
 /* Exported types ------------------------------------------------------------*/
-typedef enum
-{
+typedef enum {
   P2P_SERVER_LED_C,
   P2P_SERVER_SWITCH_C,
 
@@ -50,8 +49,7 @@ typedef enum
   P2P_SERVER_CHAROPCODE_LAST
 } P2P_SERVER_CharOpcode_t;
 
-typedef enum
-{
+typedef enum {
   P2P_SERVER_LED_C_READ_EVT,
   P2P_SERVER_LED_C_WRITE_NO_RESP_EVT,
   P2P_SERVER_SWITCH_C_NOTIFY_ENABLED_EVT,
@@ -64,8 +62,7 @@ typedef enum
   P2P_SERVER_BOOT_REQUEST_EVT
 } P2P_SERVER_OpcodeEvt_t;
 
-typedef struct
-{
+typedef struct {
   uint8_t *p_Payload;
   uint8_t Length;
 
@@ -75,13 +72,12 @@ typedef struct
 
 } P2P_SERVER_Data_t;
 
-typedef struct
-{
-  P2P_SERVER_OpcodeEvt_t       EvtOpcode;
-  P2P_SERVER_Data_t             DataTransfered;
-  uint16_t                ConnectionHandle;
-  uint16_t                AttributeHandle;
-  uint8_t                 ServiceInstance;
+typedef struct {
+  P2P_SERVER_OpcodeEvt_t EvtOpcode;
+  P2P_SERVER_Data_t DataTransfered;
+  uint16_t ConnectionHandle;
+  uint16_t AttributeHandle;
+  uint8_t ServiceInstance;
 
   /* USER CODE BEGIN Service1_NotificationEvt_t */
 
@@ -111,8 +107,11 @@ typedef struct
 /* Exported functions ------------------------------------------------------- */
 void P2P_SERVER_Init(void);
 void P2P_SERVER_Notification(P2P_SERVER_NotificationEvt_t *p_Notification);
-tBleStatus P2P_SERVER_UpdateValue(P2P_SERVER_CharOpcode_t CharOpcode, P2P_SERVER_Data_t *pData);
-tBleStatus P2P_SERVER_NotifyValue(P2P_SERVER_CharOpcode_t CharOpcode, P2P_SERVER_Data_t *pData, uint16_t ConnectionHandle);
+tBleStatus P2P_SERVER_UpdateValue(P2P_SERVER_CharOpcode_t CharOpcode,
+                                  P2P_SERVER_Data_t *pData);
+tBleStatus P2P_SERVER_NotifyValue(P2P_SERVER_CharOpcode_t CharOpcode,
+                                  P2P_SERVER_Data_t *pData,
+                                  uint16_t ConnectionHandle);
 /* USER CODE BEGIN EF */
 
 /* USER CODE END EF */

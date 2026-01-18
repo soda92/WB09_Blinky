@@ -62,7 +62,7 @@ func runInit() {
 	if err := internal.CopyDir(filepath.Join(internal.SDKPath, "Drivers"), "Drivers"); err != nil {
 		fmt.Printf("Error copying Drivers: %v\n", err)
 	}
-	
+
 	// Create Middlewares/ST structure before copying
 	os.MkdirAll("Middlewares/ST", 0755)
 	if err := internal.CopyDir(filepath.Join(internal.SDKPath, "Middlewares/ST/STM32_BLE"), "Middlewares/ST/STM32_BLE"); err != nil {
@@ -91,16 +91,16 @@ func runInit() {
 		}
 	}
 
-		// 5. Generate Makefile
-		fmt.Println("Generating Makefile...")
-		if err := os.WriteFile("Makefile", []byte(templates.Makefile), 0644); err != nil {
-			fmt.Printf("Error generating Makefile: %v\n", err)
-		}
-	
-			// 6. Apply Project Configuration
-			if config, err := internal.LoadConfig(); err == nil {
-				fmt.Println("Applying project configuration...")
-				internal.ApplyConfig(config)
-			}		
-		fmt.Println("Initialization complete.")
+	// 5. Generate Makefile
+	fmt.Println("Generating Makefile...")
+	if err := os.WriteFile("Makefile", []byte(templates.Makefile), 0644); err != nil {
+		fmt.Printf("Error generating Makefile: %v\n", err)
 	}
+
+	// 6. Apply Project Configuration
+	if config, err := internal.LoadConfig(); err == nil {
+		fmt.Println("Applying project configuration...")
+		internal.ApplyConfig(config)
+	}
+	fmt.Println("Initialization complete.")
+}

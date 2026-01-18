@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file    p2p_server_app.h
-  * @author  MCD Application Team
-  * @brief   Header for p2p_server_app.c
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    p2p_server_app.h
+ * @author  MCD Application Team
+ * @brief   Header for p2p_server_app.c
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2024 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
@@ -32,8 +32,7 @@ extern "C" {
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
-typedef enum
-{
+typedef enum {
   P2P_SERVER_CONN_HANDLE_EVT,
   P2P_SERVER_DISCON_HANDLE_EVT,
 
@@ -44,10 +43,9 @@ typedef enum
   P2P_SERVER_LAST_EVT,
 } P2P_SERVER_APP_OpcodeNotificationEvt_t;
 
-typedef struct
-{
-  P2P_SERVER_APP_OpcodeNotificationEvt_t          EvtOpcode;
-  uint16_t                                 ConnectionHandle;
+typedef struct {
+  P2P_SERVER_APP_OpcodeNotificationEvt_t EvtOpcode;
+  uint16_t ConnectionHandle;
 
   /* USER CODE BEGIN P2P_SERVER_APP_ConnHandleNotEvt_t */
 
@@ -59,9 +57,9 @@ typedef struct
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-#define CFG_DEV_ID_P2P_SERVER1                  (0x83)
-#define CFG_BOARD_ID_WB0                        (0x8D)
-#define CFG_FW_DATA3_FUOTA                      (0x01)
+#define CFG_DEV_ID_P2P_SERVER1 (0x83)
+#define CFG_BOARD_ID_WB0 (0x8D)
+#define CFG_FW_DATA3_FUOTA (0x01)
 /* USER CODE END EC */
 
 /* External variables --------------------------------------------------------*/

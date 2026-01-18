@@ -35,7 +35,7 @@ var lpmCmd = &cobra.Command{
 			fmt.Println("Invalid argument. Use: enable or disable")
 			os.Exit(1)
 		}
-		
+
 		if err := internal.SaveConfig(config); err != nil {
 			fmt.Printf("Error saving config: %v\n", err)
 			return

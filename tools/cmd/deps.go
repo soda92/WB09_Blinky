@@ -56,16 +56,16 @@ var sourcePaths = []string{
 var knownSymbols = map[string]string{
 	"blue_unit_conversion": "blue_unit_conversion.s",
 	"CPUcontextSave":       "cpu_context_switch.s",
-		"APP_DEBUG_SIGNAL_SET": "app_debug.c",
-		"RT_DEBUG_GPIO_Init":   "app_debug.c",
-		"UTIL_PowerDriver":     "stm32_lpm_if.c",
-		"HOST_TO_LE_16":        "ble_types.h", // Just in case
+	"APP_DEBUG_SIGNAL_SET": "app_debug.c",
+	"RT_DEBUG_GPIO_Init":   "app_debug.c",
+	"UTIL_PowerDriver":     "stm32_lpm_if.c",
+	"HOST_TO_LE_16":        "ble_types.h", // Just in case
 }
 
 func runDeps() {
 	os.MkdirAll(internal.LibIncDir, 0755)
 	os.MkdirAll(internal.LibSrcDir, 0755)
-	
+
 	// Seed with existing source files in all source paths
 	for _, p := range sourcePaths {
 		files, _ := filepath.Glob(filepath.Join(p, "*.c"))
@@ -107,7 +107,7 @@ func scanFile(path string) {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
-		
+
 		// Check for Includes
 		if strings.HasPrefix(line, "#include") {
 			parts := strings.Split(line, "\"")
@@ -158,13 +158,13 @@ func processDependency(filename string) {
 		scanFile(existingPath)
 		return
 	}
-	
+
 	// Not found locally, search in Repo
 	path := internal.FindFileInRepo(internal.SDKPath, filename)
 	if path != "" {
 		fmt.Printf("Found missing dependency: %s -> Copying to %s\n", filename, targetDir)
 		internal.CopyFile(path, filepath.Join(targetDir, filename))
-		
+
 		// Scan the new file
 		scanFile(filepath.Join(targetDir, filename))
 

@@ -51,7 +51,7 @@ var monitorCmd = &cobra.Command{
 		c := exec.Command("timeout", "10s", "cat", port)
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr
-		
+
 		err := c.Run()
 		if exitError, ok := err.(*exec.ExitError); ok {
 			if exitError.ExitCode() == 124 {
@@ -59,7 +59,7 @@ var monitorCmd = &cobra.Command{
 				return
 			}
 		}
-		
+
 		if err != nil {
 			fmt.Printf("Error running monitor: %v\n", err)
 		}

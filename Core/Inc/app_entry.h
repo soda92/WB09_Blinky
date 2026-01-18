@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file    app_entry.h
-  * @author  MCD Application Team
-  * @brief   Interface to the application
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    app_entry.h
+ * @author  MCD Application Team
+ * @brief   Interface to the application
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2024 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
@@ -49,7 +49,8 @@ extern "C" {
 
 /* USER CODE END EV */
 
-/* Exported macros ------------------------------------------------------------*/
+/* Exported macros
+ * ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
 
 /* USER CODE END EM */
@@ -66,7 +67,7 @@ void APPE_Button1Action(void);
 void APPE_Button2Action(void);
 void APPE_Button3Action(void);
 #endif
-void UartRxCpltCallback(uint8_t * pRxDataBuff, uint16_t nDataSize);
+void UartRxCpltCallback(uint8_t *pRxDataBuff, uint16_t nDataSize);
 /* USER CODE END EF */
 
 #ifdef __cplusplus

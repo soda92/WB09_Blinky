@@ -16,7 +16,7 @@ var blockRegex = regexp.MustCompile(`/\* USER CODE BEGIN ([a-zA-Z0-9_]+) \*/([\s
 // ExtractUserCode reads a file and returns a map of all user code blocks.
 func ExtractUserCode(path string) (UserCodeMap, error) {
 	codes := make(UserCodeMap)
-	
+
 	if !FileExists(path) {
 		return codes, nil // Return empty map if file doesn't exist
 	}
@@ -33,7 +33,7 @@ func ExtractUserCode(path string) (UserCodeMap, error) {
 			startTag := match[1]
 			code := match[2]
 			endTag := match[3]
-			
+
 			if startTag == endTag {
 				codes[startTag] = code
 			}
@@ -54,17 +54,17 @@ func InjectUserCode(fileContent string, codes UserCodeMap) string {
 		}
 		startTag := subMatches[1]
 		endTag := subMatches[3]
-		
+
 		if startTag != endTag {
 			return match // Mismatched tags, ignore
 		}
-		
+
 		if userCode, ok := codes[startTag]; ok {
 			// Found saved code for this tag!
 			// Construct the block again with saved code.
 			return fmt.Sprintf("/* USER CODE BEGIN %s */%s/* USER CODE END %s */", startTag, userCode, startTag)
 		}
-		
+
 		// If no user code saved, keep the template's content
 		return match
 	})
@@ -81,8 +81,8 @@ func RestoreUserCodeInFile(path string, codes UserCodeMap) error {
 	if err != nil {
 		return err
 	}
-	
+
 	newContent := InjectUserCode(string(contentBytes), codes)
-	
+
 	return os.WriteFile(path, []byte(newContent), 0644)
 }

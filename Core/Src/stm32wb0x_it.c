@@ -1,27 +1,27 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file    stm32wb0x_it.c
-  * @brief   Interrupt Service Routines.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    stm32wb0x_it.c
+ * @brief   Interrupt Service Routines.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2024 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
 #include "stm32wb0x_it.h"
-#include "hw_pka.h"
 #include "ble_stack.h"
+#include "hw_pka.h"
+#include "main.h"
 #include "miscutil.h"
 #include "stm32wb0x_ll_usart.h"
 /* Private includes ----------------------------------------------------------*/
@@ -69,40 +69,35 @@ extern UART_HandleTypeDef huart1;
 /*           Cortex Processor Interruption and Exception Handlers          */
 /******************************************************************************/
 /**
-  * @brief This function handles Non maskable interrupt.
-  */
-void NMI_Handler(void)
-{
+ * @brief This function handles Non maskable interrupt.
+ */
+void NMI_Handler(void) {
   /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
 
   /* USER CODE END NonMaskableInt_IRQn 0 */
   /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
-   while (1)
-  {
+  while (1) {
   }
   /* USER CODE END NonMaskableInt_IRQn 1 */
 }
 
 /**
-  * @brief This function handles Hard fault interrupt.
-  */
-void HardFault_Handler(void)
-{
+ * @brief This function handles Hard fault interrupt.
+ */
+void HardFault_Handler(void) {
   /* USER CODE BEGIN HardFault_IRQn 0 */
 
   /* USER CODE END HardFault_IRQn 0 */
-  while (1)
-  {
+  while (1) {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
 }
 
 /**
-  * @brief This function handles System service call via SWI instruction.
-  */
-void SVC_Handler(void)
-{
+ * @brief This function handles System service call via SWI instruction.
+ */
+void SVC_Handler(void) {
   /* USER CODE BEGIN SVCall_IRQn 0 */
 
   /* USER CODE END SVCall_IRQn 0 */
@@ -112,10 +107,9 @@ void SVC_Handler(void)
 }
 
 /**
-  * @brief This function handles Pendable request for system service.
-  */
-void PendSV_Handler(void)
-{
+ * @brief This function handles Pendable request for system service.
+ */
+void PendSV_Handler(void) {
   /* USER CODE BEGIN PendSV_IRQn 0 */
 
   /* USER CODE END PendSV_IRQn 0 */
@@ -125,10 +119,9 @@ void PendSV_Handler(void)
 }
 
 /**
-  * @brief This function handles System tick timer.
-  */
-void SysTick_Handler(void)
-{
+ * @brief This function handles System tick timer.
+ */
+void SysTick_Handler(void) {
   /* USER CODE BEGIN SysTick_IRQn 0 */
 
   /* USER CODE END SysTick_IRQn 0 */
@@ -146,18 +139,17 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief This function handles USART1 Interrupt.
-  */
-void USART1_IRQHandler(void)
-{
+ * @brief This function handles USART1 Interrupt.
+ */
+void USART1_IRQHandler(void) {
   /* USER CODE BEGIN USART1_IRQn 0 */
-  uint8_t read_data; 
-  
+  uint8_t read_data;
+
   /* If the RX FIFO is Not Empty */
-  if(LL_USART_IsActiveFlag_RXNE(USART1) == 1) {
+  if (LL_USART_IsActiveFlag_RXNE(USART1) == 1) {
     /* Read a byte from the RX FIFO */
     read_data = LL_USART_ReceiveData8(USART1);
-    
+
     /* Send the data received to the user RX callback */
     UartRxCpltCallback(&read_data, 1);
   }
@@ -168,10 +160,9 @@ void USART1_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles PKA global interrupt.
-  */
-void PKA_IRQHandler(void)
-{
+ * @brief This function handles PKA global interrupt.
+ */
+void PKA_IRQHandler(void) {
   /* USER CODE BEGIN PKA_IRQn 0 */
 
   /* USER CODE END PKA_IRQn 0 */
@@ -182,10 +173,9 @@ void PKA_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles RADIO_TIMER_CPU_WKUP global interrupt.
-  */
-void RADIO_TIMER_CPU_WKUP_IRQHandler(void)
-{
+ * @brief This function handles RADIO_TIMER_CPU_WKUP global interrupt.
+ */
+void RADIO_TIMER_CPU_WKUP_IRQHandler(void) {
   /* USER CODE BEGIN RADIO_TIMER_CPU_WKUP_IRQn 0 */
 
   /* USER CODE END RADIO_TIMER_CPU_WKUP_IRQn 0 */
@@ -196,10 +186,9 @@ void RADIO_TIMER_CPU_WKUP_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles RADIO_TIMER_ERROR global interrupt.
-  */
-void RADIO_TIMER_ERROR_IRQHandler(void)
-{
+ * @brief This function handles RADIO_TIMER_ERROR global interrupt.
+ */
+void RADIO_TIMER_ERROR_IRQHandler(void) {
   /* USER CODE BEGIN RADIO_TIMER_ERROR_IRQn 0 */
 
   /* USER CODE END RADIO_TIMER_ERROR_IRQn 0 */
@@ -210,10 +199,9 @@ void RADIO_TIMER_ERROR_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles RADIO_TXRX global interrupt.
-  */
-void RADIO_TXRX_IRQHandler(void)
-{
+ * @brief This function handles RADIO_TXRX global interrupt.
+ */
+void RADIO_TXRX_IRQHandler(void) {
   /* USER CODE BEGIN RADIO_TXRX_IRQn 0 */
 
   /* USER CODE END RADIO_TXRX_IRQn 0 */
@@ -224,10 +212,9 @@ void RADIO_TXRX_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles RADIO_TXRX_SEQ global interrupt.
-  */
-void RADIO_TXRX_SEQ_IRQHandler(void)
-{
+ * @brief This function handles RADIO_TXRX_SEQ global interrupt.
+ */
+void RADIO_TXRX_SEQ_IRQHandler(void) {
   /* USER CODE BEGIN RADIO_TXRX_SEQ_IRQn 0 */
 
   /* USER CODE END RADIO_TXRX_SEQ_IRQn 0 */
@@ -238,10 +225,9 @@ void RADIO_TXRX_SEQ_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles RADIO_RRM global interrupt.
-  */
-void RADIO_RRM_IRQHandler(void)
-{
+ * @brief This function handles RADIO_RRM global interrupt.
+ */
+void RADIO_RRM_IRQHandler(void) {
   /* USER CODE BEGIN RADIO_RRM_IRQn 0 */
 
   /* USER CODE END RADIO_RRM_IRQn 0 */
@@ -252,13 +238,9 @@ void RADIO_RRM_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-void GPIOA_IRQHandler(void)
-{
-  BSP_PB_IRQHandler(B1_GPIO_PORT, B1_PIN);
-}
+void GPIOA_IRQHandler(void) { BSP_PB_IRQHandler(B1_GPIO_PORT, B1_PIN); }
 
-void GPIOB_IRQHandler(void)
-{
+void GPIOB_IRQHandler(void) {
   BSP_PB_IRQHandler(B2_GPIO_PORT, B2_PIN);
   BSP_PB_IRQHandler(B3_GPIO_PORT, B3_PIN);
 }
