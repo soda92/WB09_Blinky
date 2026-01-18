@@ -2,8 +2,6 @@
 /flash_tool
 /Drivers/
 /Middlewares/
-/STM32_BLE
-/Core
 /Library
 /wb09_tool
 /Makefile

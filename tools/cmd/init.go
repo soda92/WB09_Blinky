@@ -26,6 +26,27 @@ func runInit() {
 	templatePath := internal.DefaultTemplatePath
 	fmt.Printf("Initializing project from template: %s\n", templatePath)
 
+	var preservableFiles = []string{
+		"Core/Src/main.c",
+		"Core/Inc/main.h",
+		"Core/Inc/app_conf.h",
+		"Core/Src/stm32wb0x_hal_msp.c",
+		"Core/Src/app_entry.c",
+		"STM32_BLE/App/app_ble.c",
+		"STM32_BLE/App/ble_conf.h",
+	}
+
+	savedCodes := make(map[string]internal.UserCodeMap)
+
+	fmt.Println("Preserving user code...")
+	for _, f := range preservableFiles {
+		codes, err := internal.ExtractUserCode(f)
+		if err == nil && len(codes) > 0 {
+			savedCodes[f] = codes
+			fmt.Printf("  Saved %d blocks from %s\n", len(codes), f)
+		}
+	}
+
 	// 1. Copy Application Code (Core, STM32_BLE) from Template
 	fmt.Println("Copying Application Code...")
 	if err := internal.CopyDir(filepath.Join(templatePath, "Core"), "Core"); err != nil {
@@ -58,6 +79,16 @@ func runInit() {
 	// 4. Create Library Directories
 	os.MkdirAll(internal.LibSrcDir, 0755)
 	os.MkdirAll(internal.LibIncDir, 0755)
+
+	// Restore User Code
+	fmt.Println("Restoring user code...")
+	for f, codes := range savedCodes {
+		if err := internal.RestoreUserCodeInFile(f, codes); err != nil {
+			fmt.Printf("  Error restoring %s: %v\n", f, err)
+		} else {
+			fmt.Printf("  Restored %s\n", f)
+		}
+	}
 
 	// 5. Generate Makefile
 	fmt.Println("Generating Makefile...")
