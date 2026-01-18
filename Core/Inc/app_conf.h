@@ -50,15 +50,15 @@
 /**
  * Define Advertising parameters
  */
-#define CFG_PUBLIC_BD_ADDRESS               (0x0280E1887766)
-#define CFG_BD_ADDRESS_TYPE                 HCI_ADDR_STATIC_RANDOM_ADDR
+#define CFG_PUBLIC_BD_ADDRESS               (0x112233445566)
+#define CFG_BD_ADDRESS_TYPE                 HCI_ADDR_PUBLIC
 #define CFG_BLE_PRIVACY_ENABLED             (0)
 
 #define ADV_INTERVAL_MIN                    (0x0080)
 #define ADV_INTERVAL_MAX                    (0x00A0)
 #define ADV_LP_INTERVAL_MIN                 (0x0640)
 #define ADV_LP_INTERVAL_MAX                 (0x0FA0)
-#define ADV_TYPE                            (HCI_ADV_EVENT_PROP_LEGACY)
+#define ADV_TYPE                            (HCI_ADV_EVENT_PROP_LEGACY | HCI_ADV_EVENT_PROP_SCANNABLE)
 #define ADV_FILTER                          HCI_ADV_FILTER_NONE
 
 /**
@@ -416,7 +416,7 @@ typedef enum
 /**
  * Enable or disable debug prints.
  */
-#define CFG_DEBUG_APP_TRACE             (0)
+#define CFG_DEBUG_APP_TRACE             (1)
 
 /**
  * Use or not advanced trace module. UART interrupts to be enabled.
