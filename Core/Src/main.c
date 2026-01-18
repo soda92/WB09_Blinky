@@ -213,7 +213,7 @@ static void MX_ADC1_Init(void)
   hadc1.Init.ConversionType = ADC_CONVERSION_WITH_DS;
   hadc1.Init.SequenceLength = 1;
   hadc1.Init.SamplingMode = ADC_SAMPLING_AT_START;
-  hadc1.Init.SampleRate = ADC_SAMPLE_RATE_16;
+  hadc1.Init.SampleRate = ADC_SAMPLE_RATE_140;
   hadc1.Init.InvertOutputMode = ADC_DATA_INVERT_NONE;
   hadc1.Init.Overrun = ADC_NEW_DATA_IS_LOST;
   hadc1.Init.ContinuousConvMode = DISABLE;
@@ -320,54 +320,97 @@ void BSP_PB_Callback(Button_TypeDef Button)
 {
   switch (Button)
   {
-    case B1:
-      printf("Button B1 pressed!\r\n");
-      
-      ADC_ChannelConfTypeDef sConfig = {0};
-      sConfig.Rank = ADC_RANK_1;
-      sConfig.VoltRange = ADC_VIN_RANGE_1V2;
-      sConfig.CalibrationPoint.Number = ADC_CALIB_NONE;
-      sConfig.CalibrationPoint.Gain = 0;
-      sConfig.CalibrationPoint.Offset = 0;
-
-      // Measure Temperature
-      sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
-      if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) == HAL_OK)
-      {
-        HAL_ADC_Start(&hadc1);
-        if (HAL_ADC_PollForConversion(&hadc1, 100) == HAL_OK)
-        {
-          uint32_t rawTemp = HAL_ADC_GetValue(&hadc1);
-          int32_t temperature = __LL_ADC_CALC_TEMPERATURE(rawTemp, LL_ADC_DS_DATA_WIDTH_12_BIT);
-          printf("Temperature: %ld C\r\n", temperature);
-        }
-      }
-
-      // Measure Vbat
-      sConfig.Channel = ADC_CHANNEL_VBAT;
-      if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) == HAL_OK)
-      {
-        HAL_ADC_Start(&hadc1);
-        if (HAL_ADC_PollForConversion(&hadc1, 100) == HAL_OK)
-        {
-          uint32_t rawVbat = HAL_ADC_GetValue(&hadc1);
-          // Calc voltage based on 1.2V ref, multiply by 3 for divider
-          uint32_t volt = __LL_ADC_CALC_DATA_TO_VOLTAGE(LL_ADC_VIN_RANGE_1V2, rawVbat, LL_ADC_DS_DATA_WIDTH_12_BIT);
-          printf("Vbat: %ld mV\r\n", volt * 3);
-        }
-      }
-      break;
-    case B2:
-      printf("Button B2 pressed!\r\n");
-      break;
-    case B3:
-      printf("Button B3 pressed!\r\n");
-      printf("UID: 0x%08lX%08lX\r\n", LL_GetUID_Word1(), LL_GetUID_Word0());
-      printf("Flash Size Reg: 0x%lX\r\n", LL_GetFlashSize());
-      break;
-    default:
-      break;
-  }
+        case B1:
+          printf("Button B1 pressed!\r\n");
+          
+          ADC_ChannelConfTypeDef sConfig = {0};
+          sConfig.Rank = ADC_RANK_1;
+          sConfig.VoltRange = ADC_VIN_RANGE_1V2;
+          sConfig.CalibrationPoint.Number = ADC_CALIB_NONE;
+          sConfig.CalibrationPoint.Gain = 0;
+          sConfig.CalibrationPoint.Offset = 0;
+    
+          int32_t temperature = 0;
+    
+          // Measure Temperature
+          sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
+          if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) == HAL_OK)
+          {
+            HAL_ADC_Start(&hadc1);
+            if (HAL_ADC_PollForConversion(&hadc1, 100) == HAL_OK)
+            {
+              uint32_t rawTemp = HAL_ADC_GetValue(&hadc1);
+              temperature = __LL_ADC_CALC_TEMPERATURE(rawTemp, LL_ADC_DS_DATA_WIDTH_12_BIT);
+              printf("Temperature: %ld C\r\n", temperature);
+            }
+            HAL_ADC_Stop(&hadc1);
+          }
+    
+          // Save to Flash (Page 128 @ 0x10080000)
+          uint32_t addr = 0x10080000;
+          uint32_t end_addr = 0x10080800; // End of 2KB page
+          while (addr < end_addr && *(uint32_t*)addr != 0xFFFFFFFF)
+          {
+            addr += 4;
+          }
+    
+                if (addr < end_addr)
+                {
+                  HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, addr, (uint32_t)temperature);
+                  printf("Saved to 0x%08lX\r\n", addr);
+                }
+                else
+                {
+                  printf("Flash Full! Use B3 to Erase.\r\n");
+                }
+          
+                // Measure Vbat (Optional, kept for info)
+                sConfig.Channel = ADC_CHANNEL_VBAT;
+                if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) == HAL_OK)
+                {
+                  HAL_ADC_Start(&hadc1);
+                  if (HAL_ADC_PollForConversion(&hadc1, 100) == HAL_OK)
+                  {
+                    uint32_t rawVbat = HAL_ADC_GetValue(&hadc1);
+                    uint32_t volt = __LL_ADC_CALC_DATA_TO_VOLTAGE(LL_ADC_VIN_RANGE_1V2, rawVbat, LL_ADC_DS_DATA_WIDTH_12_BIT);
+                    printf("Vbat: %ld mV\r\n", volt * 3);
+                  }
+                  HAL_ADC_Stop(&hadc1);
+                }
+                break;
+          
+              case B2:
+                printf("Button B2 pressed! Reading Log...\r\n");
+                uint32_t read_addr = 0x10080000;
+                int count = 0;
+                while (read_addr < 0x10080800)
+                {
+                  uint32_t val = *(uint32_t*)read_addr;
+                  if (val == 0xFFFFFFFF) break;
+                  printf("Entry %d: %ld C\r\n", count++, (int32_t)val);
+                  read_addr += 4;
+                }
+                if (count == 0) printf("No data found.\r\n");
+                break;
+          
+              case B3:
+                printf("Button B3 pressed! Erasing Log...\r\n");
+                FLASH_EraseInitTypeDef EraseInit;
+                EraseInit.TypeErase = FLASH_TYPEERASE_PAGES;
+                EraseInit.Page = 128; // Page index for 0x10080000
+                EraseInit.NbPages = 1;
+                uint32_t PageError = 0;
+                if (HAL_FLASHEx_Erase(&EraseInit, &PageError) == HAL_OK)
+                {
+                  printf("Log Erased!\r\n");
+                }
+                else
+                {
+                  printf("Erase Failed! Error: 0x%lX\r\n", PageError);
+                }
+                break;
+              default:
+                break;  }
 }
 /* USER CODE END 4 */
 
