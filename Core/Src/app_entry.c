@@ -42,13 +42,23 @@
 /* Private typedef -----------------------------------------------------------*/
 
 /* USER CODE BEGIN PTD */
-
+#if (CFG_BUTTON_SUPPORTED == 1)
+typedef struct
+{
+  Button_TypeDef      button;
+  VTIMER_HandleType   longTimerId;
+  uint8_t             longPressed;
+} ButtonDesc_t;
+#endif /* (CFG_BUTTON_SUPPORTED == 1) */
 /* USER CODE END PTD */
 
 /* Private defines -----------------------------------------------------------*/
 
 /* USER CODE BEGIN PD */
-
+#if (CFG_BUTTON_SUPPORTED == 1)
+#define BUTTON_LONG_PRESS_THRESHOLD_MS   (500u)
+#define BUTTON_NB_MAX                    (B3 + 1u)
+#endif
 /* Section specific to button management using UART */
 #define C_SIZE_CMD_STRING       256U
 
@@ -62,7 +72,10 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+#if (CFG_BUTTON_SUPPORTED == 1)
+/* Button management */
+static ButtonDesc_t buttonDesc[BUTTON_NB_MAX];
+#endif
 /* Section specific to button management using UART */
 static uint8_t CommandString[C_SIZE_CMD_STRING];
 static uint16_t indexReceiveChar = 0;
@@ -78,13 +91,17 @@ static uint16_t indexReceiveChar = 0;
 /* Private functions prototypes-----------------------------------------------*/
 
 /* USER CODE BEGIN PFP */
-
+#if (CFG_LED_SUPPORTED == 1)
+static void Led_Init(void);
+#endif
+#if (CFG_BUTTON_SUPPORTED == 1)
+static void Button_Init(void);
+static void Button_TriggerActions(void *arg);
+#endif
 /* Section specific to button management using UART */
 static void RxUART_Init(void);
 //static void RxCpltCallback(uint8_t * pRxDataBuff, uint16_t nDataSize);
 static void UartCmdExecute(void);
-void UartRxCpltCallback(uint8_t * pRxDataBuff, uint16_t nDataSize);
-
 /* USER CODE END PFP */
 
 /* External variables --------------------------------------------------------*/
@@ -109,8 +126,15 @@ uint32_t MX_APPE_Init(void *p_param)
 #endif
 
   /* USER CODE BEGIN APPE_Init_1 */
+#if (CFG_LED_SUPPORTED == 1)
+  Led_Init();
+#endif
+#if (CFG_BUTTON_SUPPORTED == 1)
+  Button_Init();
+#endif
+  
 #if (CFG_DEBUG_APP_TRACE != 0) && (CFG_DEBUG_APP_ADV_TRACE == 0)
-  COM_InitTypeDef COM_Init =
+  COM_InitTypeDef COM_Init = 
   {
    .BaudRate = 115200,
    .WordLength= COM_WORDLENGTH_8B,
@@ -119,8 +143,8 @@ uint32_t MX_APPE_Init(void *p_param)
    .HwFlowCtl = COM_HWCONTROL_NONE
   };
   BSP_COM_Init(COM1, &COM_Init);
-
-#endif
+  
+#endif  
   
   RxUART_Init();
   
@@ -148,6 +172,56 @@ uint32_t MX_APPE_Init(void *p_param)
 }
 
 /* USER CODE BEGIN FD */
+#if (CFG_BUTTON_SUPPORTED == 1)
+/**
+ * @brief   Indicate if the selected button was pressedn during a 'long time' or not.
+ *
+ * @param   btnIdx    Button to test, listed in enum Button_TypeDef
+ * @return  '1' if pressed during a 'long time', else '0'.
+ */
+uint8_t APPE_ButtonIsLongPressed(uint16_t btnIdx)
+{
+  uint8_t pressStatus;
+
+  if ( btnIdx < BUTTON_NB_MAX )
+  {
+    pressStatus = buttonDesc[btnIdx].longPressed;
+  }
+  else
+  {
+    pressStatus = 0;
+  }
+
+  return pressStatus;
+}
+
+/**
+ * @brief  Action of button 1 when pressed, to be implemented by user.
+ * @param  None
+ * @retval None
+ */
+__WEAK void APPE_Button1Action(void)
+{
+}
+
+/**
+ * @brief  Action of button 2 when pressed, to be implemented by user.
+ * @param  None
+ * @retval None
+ */
+__WEAK void APPE_Button2Action(void)
+{
+}
+
+/**
+ * @brief  Action of button 3 when pressed, to be implemented by user.
+ * @param  None
+ * @retval None
+ */
+__WEAK void APPE_Button3Action(void)
+{
+}
+#endif
 
 /* USER CODE END FD */
 
@@ -162,7 +236,7 @@ static PowerSaveLevels App_PowerSaveLevel_Check(void)
   PowerSaveLevels output_level = POWER_SAVE_LEVEL_STOP;
 
   /* USER CODE BEGIN App_PowerSaveLevel_Check_1 */
-  
+
   /* USER CODE END App_PowerSaveLevel_Check_1 */
 
   return output_level;
@@ -170,12 +244,89 @@ static PowerSaveLevels App_PowerSaveLevel_Check(void)
 #endif
 
 /* USER CODE BEGIN FD_LOCAL_FUNCTIONS */
+#if (CFG_LED_SUPPORTED == 1)
+static void Led_Init( void )
+{
+  /* Leds Initialization */
+  BSP_LED_Init(LED_BLUE);
+  BSP_LED_Init(LED_GREEN);
+  BSP_LED_Init(LED_RED);
+
+  BSP_LED_On(LED_GREEN);
+
+  return;
+}
+#endif
+
+#if (CFG_BUTTON_SUPPORTED == 1)
+static void Button_Init( void )
+{
+  /* Button Initialization */
+  buttonDesc[B1].button = B1;
+  buttonDesc[B2].button = B2;
+  buttonDesc[B3].button = B3;
+  BSP_PB_Init(B1, BUTTON_MODE_EXTI);
+  BSP_PB_Init(B2, BUTTON_MODE_EXTI);
+  BSP_PB_Init(B3, BUTTON_MODE_EXTI);
+  
+#if (CFG_LPM_SUPPORTED == 1)
+  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PA0, PWR_WUP_FALLEDG);
+  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PB5, PWR_WUP_FALLEDG);
+#if defined(STM32WB06) || defined(STM32WB07)
+  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PB9, PWR_WUP_FALLEDG);
+#else
+  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PB14, PWR_WUP_FALLEDG);
+#endif  
+#endif  
+  
+  /* Register tasks associated to buttons */
+  UTIL_SEQ_RegTask(1U << TASK_BUTTON_1, UTIL_SEQ_RFU, APPE_Button1Action);
+  UTIL_SEQ_RegTask(1U << TASK_BUTTON_2, UTIL_SEQ_RFU, APPE_Button2Action);
+  UTIL_SEQ_RegTask(1U << TASK_BUTTON_3, UTIL_SEQ_RFU, APPE_Button3Action);
+
+  /* Create timers to detect button long press (one for each button) */
+  Button_TypeDef buttonIndex;
+  for ( buttonIndex = B1; buttonIndex < BUTTON_NB_MAX; buttonIndex++ )
+  {
+    buttonDesc[buttonIndex].longTimerId.callback = Button_TriggerActions;
+    buttonDesc[buttonIndex].longTimerId.userData = &buttonDesc[buttonIndex];
+  }
+  
+  return;
+}
+
+static void Button_TriggerActions(void *arg)
+{
+  ButtonDesc_t *p_buttonDesc = ((VTIMER_HandleType *)arg)->userData;
+
+  p_buttonDesc->longPressed = BSP_PB_GetState(p_buttonDesc->button);
+
+  APP_DBG_MSG("Button %d pressed\n", (p_buttonDesc->button + 1));
+  switch (p_buttonDesc->button)
+  {
+    case B1:
+      UTIL_SEQ_SetTask(1U << TASK_BUTTON_1, CFG_SEQ_PRIO_0);
+      break;
+    case B2:
+      UTIL_SEQ_SetTask(1U << TASK_BUTTON_2, CFG_SEQ_PRIO_0);
+      break;
+    case B3:
+      UTIL_SEQ_SetTask(1U << TASK_BUTTON_3, CFG_SEQ_PRIO_0);
+      break;
+    default:
+      break;
+  }
+
+  return;
+}
+
+#endif
 
 static void RxUART_Init(void)
 {
   /* Enable the RX not empty interrupt */
   LL_USART_EnableIT_RXNE(USART1);
-
+  
   /* Enable the UART IRQ */
   NVIC_SetPriority(USART1_IRQn, IRQ_HIGH_PRIORITY);
   NVIC_EnableIRQ(USART1_IRQn);
@@ -209,7 +360,59 @@ void UartRxCpltCallback(uint8_t * pRxDataBuff, uint16_t nDataSize)
 
 static void UartCmdExecute(void)
 {
-
+  /* Parse received CommandString */
+  if(strcmp((char const*)CommandString, "SW1") == 0)
+  {
+    APP_DBG_MSG("SW1 OK\n");
+#if (CFG_BUTTON_SUPPORTED == 1)
+    buttonDesc[B1].longPressed = 0;
+    UTIL_SEQ_SetTask(1U << TASK_BUTTON_1, CFG_SEQ_PRIO_0);
+#endif
+  }
+  else if (strcmp((char const*)CommandString, "SW2") == 0)
+  {
+    APP_DBG_MSG("SW2 OK\n");
+#if (CFG_BUTTON_SUPPORTED == 1)
+    buttonDesc[B2].longPressed = 0;
+    UTIL_SEQ_SetTask(1U << TASK_BUTTON_2, CFG_SEQ_PRIO_0);
+#endif
+  }
+  else if (strcmp((char const*)CommandString, "SW3") == 0)
+  {
+    APP_DBG_MSG("SW3 OK\n");
+#if (CFG_BUTTON_SUPPORTED == 1)
+    buttonDesc[B3].longPressed = 0;
+    UTIL_SEQ_SetTask(1U << TASK_BUTTON_3, CFG_SEQ_PRIO_0);
+#endif
+  }
+  else if(strcmp((char const*)CommandString, "SW1_LONG") == 0)
+  {
+    APP_DBG_MSG("SW1_LONG OK\n");
+#if (CFG_BUTTON_SUPPORTED == 1)
+    buttonDesc[B1].longPressed = 1;
+    UTIL_SEQ_SetTask(1U << TASK_BUTTON_1, CFG_SEQ_PRIO_0);
+#endif
+  }
+  else if (strcmp((char const*)CommandString, "SW2_LONG") == 0)
+  {
+    APP_DBG_MSG("SW2_LONG OK\n");
+#if (CFG_BUTTON_SUPPORTED == 1)
+    buttonDesc[B2].longPressed = 1;
+    UTIL_SEQ_SetTask(1U << TASK_BUTTON_2, CFG_SEQ_PRIO_0);
+#endif
+  }
+  else if (strcmp((char const*)CommandString, "SW3_LONG") == 0)
+  {
+    APP_DBG_MSG("SW3_LONG OK\n");
+#if (CFG_BUTTON_SUPPORTED == 1)
+    buttonDesc[B3].longPressed = 1;
+    UTIL_SEQ_SetTask(1U << TASK_BUTTON_3, CFG_SEQ_PRIO_0);
+#endif
+  }
+  else
+  {
+    APP_DBG_MSG("NOT RECOGNIZED COMMAND : %s\n", CommandString);
+  }
 }
 
 /* USER CODE END FD_LOCAL_FUNCTIONS */
@@ -296,5 +499,60 @@ void UTIL_SEQ_Idle( void )
 }
 
 /* USER CODE BEGIN FD_WRAP_FUNCTIONS */
+#if (CFG_BUTTON_SUPPORTED == 1)
+void BSP_PB_Callback(Button_TypeDef Button)
+{
+  buttonDesc[Button].longPressed = 0;
+  HAL_RADIO_TIMER_StartVirtualTimer(&buttonDesc[Button].longTimerId, BUTTON_LONG_PRESS_THRESHOLD_MS);
+
+  return;
+}
+
+#if (CFG_LPM_SUPPORTED == 1)
+void HAL_PWR_WKUPx_Callback(uint32_t wakeupIOs)
+{
+  if (wakeupIOs & PWR_WAKEUP_PA0)
+  {
+    BSP_PB_Callback(B1);
+  }
+  if (wakeupIOs & PWR_WAKEUP_PB5)
+  {
+    BSP_PB_Callback(B2);
+  }
+
+#if defined(STM32WB06) || defined(STM32WB07)
+  if (wakeupIOs & PWR_WAKEUP_PB9)
+  {
+    BSP_PB_Callback(B3);
+  }
+#else
+  if (wakeupIOs & PWR_WAKEUP_PB14)
+  {
+    BSP_PB_Callback(B3);
+  }
+#endif
+
+}
+#endif
+
+void HAL_GPIO_EXTI_Callback(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin)
+{
+  if (GPIO_Pin == B1_PIN)
+  {
+    BSP_PB_Callback(B1);
+  }
+  else if (GPIO_Pin == B2_PIN)
+  {
+    BSP_PB_Callback(B2);
+  }
+  else if (GPIO_Pin == B3_PIN)
+  {
+    BSP_PB_Callback(B3);
+  }
+
+  return;
+}
+
+#endif /* (CFG_BUTTON_SUPPORTED == 1) */
 
 /* USER CODE END FD_WRAP_FUNCTIONS */

@@ -31,7 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN Define */
- 
+
 /* USER CODE END Define */
 
 /* Private macro -------------------------------------------------------------*/
@@ -64,8 +64,6 @@ void HAL_MspInit(void)
 {
 
   /* USER CODE BEGIN MspInit 0 */
-
-  /* IOs configuration to have the lowest power consumption in DEEPSTOP */
   lowPowerIOSetup();
 
   /* USER CODE END MspInit 0 */

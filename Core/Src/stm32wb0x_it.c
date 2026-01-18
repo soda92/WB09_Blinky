@@ -2,10 +2,7 @@
 /**
   ******************************************************************************
   * @file    stm32wb0x_it.c
-  * @author  GPM WBL Application Team
-  * @brief   Main Interrupt Service Routines.
-  *          This file provides template for all exceptions handler and
-  *          peripherals interrupt service routine.
+  * @brief   Interrupt Service Routines.
   ******************************************************************************
   * @attention
   *
@@ -29,7 +26,6 @@
 #include "stm32wb0x_ll_usart.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -39,7 +35,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
- 
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -81,7 +77,9 @@ void NMI_Handler(void)
 
   /* USER CODE END NonMaskableInt_IRQn 0 */
   /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
-
+   while (1)
+  {
+  }
   /* USER CODE END NonMaskableInt_IRQn 1 */
 }
 
@@ -153,8 +151,7 @@ void SysTick_Handler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
-
-    uint8_t read_data; 
+  uint8_t read_data; 
   
   /* If the RX FIFO is Not Empty */
   if(LL_USART_IsActiveFlag_RXNE(USART1) == 1) {
@@ -164,7 +161,6 @@ void USART1_IRQHandler(void)
     /* Send the data received to the user RX callback */
     UartRxCpltCallback(&read_data, 1);
   }
-  
   /* USER CODE END USART1_IRQn 0 */
   /* USER CODE BEGIN USART1_IRQn 1 */
 
@@ -205,7 +201,7 @@ void RADIO_TIMER_CPU_WKUP_IRQHandler(void)
 void RADIO_TIMER_ERROR_IRQHandler(void)
 {
   /* USER CODE BEGIN RADIO_TIMER_ERROR_IRQn 0 */
-  
+
   /* USER CODE END RADIO_TIMER_ERROR_IRQn 0 */
   HAL_RADIO_TIMER_ERROR_IRQHandler();
   /* USER CODE BEGIN RADIO_TIMER_ERROR_IRQn 1 */
@@ -219,11 +215,11 @@ void RADIO_TIMER_ERROR_IRQHandler(void)
 void RADIO_TXRX_IRQHandler(void)
 {
   /* USER CODE BEGIN RADIO_TXRX_IRQn 0 */
-  
+
   /* USER CODE END RADIO_TXRX_IRQn 0 */
   HAL_RADIO_TXRX_IRQHandler();
   /* USER CODE BEGIN RADIO_TXRX_IRQn 1 */
-  
+
   /* USER CODE END RADIO_TXRX_IRQn 1 */
 }
 
@@ -256,5 +252,14 @@ void RADIO_RRM_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+void GPIOA_IRQHandler(void)
+{
+  BSP_PB_IRQHandler(B1_GPIO_PORT, B1_PIN);
+}
 
+void GPIOB_IRQHandler(void)
+{
+  BSP_PB_IRQHandler(B2_GPIO_PORT, B2_PIN);
+  BSP_PB_IRQHandler(B3_GPIO_PORT, B3_PIN);
+}
 /* USER CODE END 1 */

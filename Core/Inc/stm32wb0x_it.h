@@ -1,8 +1,7 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file    stm32wbxx_it.h
-  * @author  GPM WBL Application Team
+  * @file    stm32wb0x_it.h
   * @brief   This file contains the headers of the interrupt handlers.
   ******************************************************************************
   * @attention

@@ -1,9 +1,9 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file    app_entry.h
+  * @file    p2p_server_app.h
   * @author  MCD Application Team
-  * @brief   Interface to the application
+  * @brief   Header for p2p_server_app.c
   ******************************************************************************
   * @attention
   *
@@ -19,58 +19,70 @@
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef APP_ENTRY_H
-#define APP_ENTRY_H
+#ifndef P2P_SERVER_APP_H
+#define P2P_SERVER_APP_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "app_conf.h"
-/* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
+typedef enum
+{
+  P2P_SERVER_CONN_HANDLE_EVT,
+  P2P_SERVER_DISCON_HANDLE_EVT,
+
+  /* USER CODE BEGIN Service1_OpcodeNotificationEvt_t */
+
+  /* USER CODE END Service1_OpcodeNotificationEvt_t */
+
+  P2P_SERVER_LAST_EVT,
+} P2P_SERVER_APP_OpcodeNotificationEvt_t;
+
+typedef struct
+{
+  P2P_SERVER_APP_OpcodeNotificationEvt_t          EvtOpcode;
+  uint16_t                                 ConnectionHandle;
+
+  /* USER CODE BEGIN P2P_SERVER_APP_ConnHandleNotEvt_t */
+
+  /* USER CODE END P2P_SERVER_APP_ConnHandleNotEvt_t */
+} P2P_SERVER_APP_ConnHandleNotEvt_t;
 /* USER CODE BEGIN ET */
 
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
-
 /* USER CODE BEGIN EC */
-
+#define CFG_DEV_ID_P2P_SERVER1                  (0x83)
+#define CFG_BOARD_ID_WB0                        (0x8D)
+#define CFG_FW_DATA3_FUOTA                      (0x01)
 /* USER CODE END EC */
 
-/* Exported variables --------------------------------------------------------*/
+/* External variables --------------------------------------------------------*/
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
 
-/* Exported macros ------------------------------------------------------------*/
+/* Exported macros -----------------------------------------------------------*/
 /* USER CODE BEGIN EM */
 
 /* USER CODE END EM */
 
-/* Exported functions ---------------------------------------------*/
-void MX_APPE_Config(void);
-uint32_t MX_APPE_Init(void *p_param);
-void MX_APPE_Process(void);
-
+/* Exported functions ------------------------------------------------------- */
+void P2P_SERVER_APP_Init(void);
+void P2P_SERVER_APP_EvtRx(P2P_SERVER_APP_ConnHandleNotEvt_t *p_Notification);
 /* USER CODE BEGIN EF */
-#if (CFG_BUTTON_SUPPORTED == 1)
-uint8_t APPE_ButtonIsLongPressed(uint16_t btnIdx);
-void APPE_Button1Action(void);
-void APPE_Button2Action(void);
-void APPE_Button3Action(void);
-#endif
-void UartRxCpltCallback(uint8_t * pRxDataBuff, uint16_t nDataSize);
+
 /* USER CODE END EF */
 
 #ifdef __cplusplus
-} /* extern "C" */
+}
 #endif
 
-#endif /*APP_ENTRY_H */
+#endif /*P2P_SERVER_APP_H */

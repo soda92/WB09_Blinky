@@ -58,7 +58,7 @@
 #define ADV_INTERVAL_MAX                    (0x00A0)
 #define ADV_LP_INTERVAL_MIN                 (0x0640)
 #define ADV_LP_INTERVAL_MAX                 (0x0FA0)
-#define ADV_TYPE                            (HCI_ADV_EVENT_PROP_LEGACY | HCI_ADV_EVENT_PROP_CONNECTABLE | HCI_ADV_EVENT_PROP_SCANNABLE)
+#define ADV_TYPE                            (HCI_ADV_EVENT_PROP_LEGACY|HCI_ADV_EVENT_PROP_CONNECTABLE|HCI_ADV_EVENT_PROP_SCANNABLE)
 #define ADV_FILTER                          HCI_ADV_FILTER_NONE
 
 /**
@@ -103,17 +103,6 @@
 
 /* USER CODE BEGIN Specific_Parameters */
 
-/**
- * Beacon selection
- * Beacons are all exclusive
- */
-#define CFG_EDDYSTONE_UID_BEACON_TYPE   (1<<0)
-#define CFG_EDDYSTONE_URL_BEACON_TYPE   (1<<1)
-#define CFG_EDDYSTONE_TLM_BEACON_TYPE   (1<<2)
-#define CFG_IBEACON                     (1<<3)
-
-#define CFG_BEACON_TYPE                 (CFG_IBEACON)
-
 /* USER CODE END Specific_Parameters */
 
 /******************************************************************************
@@ -131,7 +120,7 @@
  * Maximum number of attributes that can be stored in the GATT database in addition to the attributes number already defined for the GATT and GAP services
  * (BLE_STACK_NUM_GATT_MANDATORY_ATTRIBUTES value on STM32_BLE middleware, ble_stack.h header file).
  */
-#define CFG_BLE_NUM_GATT_ATTRIBUTES                     (100)
+#define CFG_BLE_NUM_GATT_ATTRIBUTES                     (6)
 
 /**
  * Maximum number of concurrent Client's Procedures. This value must be less
@@ -165,7 +154,7 @@
  * Number of extra memory blocks, in addition to the minimum required for the
  * supported links.
  */
-#define CFG_BLE_MBLOCK_COUNT_MARGIN                     (100)
+#define CFG_BLE_MBLOCK_COUNT_MARGIN                     (0)
 
 /**
  * Maximum number of simultaneous EATT active channels. It must be less than or
@@ -183,7 +172,7 @@
  * The maximum size of payload data in octets that the L2CAP layer entity is
  * capable of accepting [0-1024].
  */
-#define CFG_BLE_COC_MPS_MAX                             (23)
+#define CFG_BLE_COC_MPS_MAX                             (247)
 
 /**
  * Maximum number of Advertising Data Sets, if Advertising Extension Feature is
@@ -205,13 +194,13 @@
  * Maximum number of slots for scanning on the secondary advertising channel,
  * if Advertising Extension Feature is enabled.
  */
-#define CFG_BLE_NUM_AUX_SCAN_SLOTS                      (2)
+#define CFG_BLE_NUM_AUX_SCAN_SLOTS                      (0)
 
 /**
  * Maximum number of slots for synchronizing to a periodic advertising train,
  * if Periodic Advertising and Synchronizing Feature is enabled.
  */
-#define CFG_BLE_NUM_SYNC_SLOTS                          (1)
+#define CFG_BLE_NUM_SYNC_SLOTS                          (0)
 
 /**
  * Two's logarithm of Filter Accept, Resolving and Advertiser list size.
@@ -237,7 +226,7 @@
 /**
  * Maximum number of slots for synchronizing to a Broadcast Isochronous Stream.
  */
-#define CFG_BLE_NUM_SYNC_BIS_MAX                        (1U)
+#define CFG_BLE_NUM_SYNC_BIS_MAX                        (2U)
 
 /**
  * Maximum number of slots for broadcasting a Broadcast Isochronous Group.
@@ -247,17 +236,17 @@
 /**
  * Maximum number of slots for broadcasting a Broadcast Isochronous Stream.
  */
-#define CFG_BLE_NUM_BRC_BIS_MAX                         (1U)
+#define CFG_BLE_NUM_BRC_BIS_MAX                         (2U)
 
 /**
  * Maximum number of Connected Isochronous Groups.
  */
-#define CFG_BLE_NUM_CIG_MAX                             (1U)
+#define CFG_BLE_NUM_CIG_MAX                             (2U)
 
 /**
  * Maximum number of Connected Isochronous Streams.
  */
-#define CFG_BLE_NUM_CIS_MAX                             (1U)
+#define CFG_BLE_NUM_CIS_MAX                             (2U)
 
 /**
 * Maximum number of simultaneous Link Layer procedures that can be managed, in addition to the minimum required by the stack.
@@ -339,9 +328,9 @@
  ******************************************************************************/
 #define CFG_BLE_CONTROLLER_SCAN_ENABLED                   (0U)
 #define CFG_BLE_CONTROLLER_PRIVACY_ENABLED                (0U)
-#define CFG_BLE_SECURE_CONNECTIONS_ENABLED                (0U)
+#define CFG_BLE_SECURE_CONNECTIONS_ENABLED                (1U)
 #define CFG_BLE_CONTROLLER_DATA_LENGTH_EXTENSION_ENABLED  (0U)
-#define CFG_BLE_CONTROLLER_2M_CODED_PHY_ENABLED           (0U)
+#define CFG_BLE_CONTROLLER_2M_CODED_PHY_ENABLED           (1U)
 #define CFG_BLE_CONTROLLER_EXT_ADV_SCAN_ENABLED           (0U)
 #define CFG_BLE_L2CAP_COS_ENABLED                         (0U)
 #define CFG_BLE_CONTROLLER_PERIODIC_ADV_ENABLED           (0U)
@@ -470,6 +459,8 @@ typedef enum
   TASK_BUTTON_1,
   TASK_BUTTON_2,
   TASK_BUTTON_3,
+  CFG_TASK_ADV_CANCEL_ID,
+  CFG_TASK_SEND_NOTIF_ID,
   /* USER CODE END CFG_Task_Id_t */
   CFG_TASK_NBR,  /**< Shall be LAST in the list */
 } CFG_Task_Id_t;

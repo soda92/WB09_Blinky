@@ -108,8 +108,6 @@ int main(void)
     .HwFlowCtl = COM_HWCONTROL_NONE
   };
   BSP_COM_Init(COM1, &com_init);
-  
-  printf("Hello from STM32WB09!\r\n");
   /* USER CODE END 2 */
 
   /* Init code for STM32_BLE */
@@ -186,11 +184,11 @@ static void MX_PKA_Init(void)
 {
 
   /* USER CODE BEGIN PKA_Init 0 */
-  
+
   /* USER CODE END PKA_Init 0 */
 
   /* USER CODE BEGIN PKA_Init 1 */
-  
+
   /* USER CODE END PKA_Init 1 */
   hpka.Instance = PKA;
   if (HAL_PKA_Init(&hpka) != HAL_OK)
@@ -198,7 +196,7 @@ static void MX_PKA_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN PKA_Init 2 */
-  
+
   /* USER CODE END PKA_Init 2 */
 
 }
@@ -247,13 +245,13 @@ static void MX_RADIO_TIMER_Init(void)
 {
 
   /* USER CODE BEGIN RADIO_TIMER_Init 0 */
-  
+
   /* USER CODE END RADIO_TIMER_Init 0 */
 
   RADIO_TIMER_InitTypeDef RADIO_TIMER_InitStruct = {0};
 
   /* USER CODE BEGIN RADIO_TIMER_Init 1 */
-  
+
   /* USER CODE END RADIO_TIMER_Init 1 */
 
   if (__HAL_RCC_RADIO_IS_CLK_DISABLED())
@@ -299,7 +297,6 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-/* Retarget printf to UART */
 int _write(int file, char *ptr, int len)
 {
   HAL_UART_Transmit(&hcom_uart[COM1], (uint8_t*)ptr, len, 1000);
@@ -334,7 +331,6 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  Error_Handler();
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
