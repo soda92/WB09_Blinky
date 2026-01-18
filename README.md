@@ -26,10 +26,18 @@ It functions as a **Dual-Mode Device**:
 | Entity | UUID | Properties | Description |
 | :--- | :--- | :--- | :--- |
 | **Service** | `0000FE40-CC7A-482A-984A-7F2ED5B3E58F` | N/A | P2P Server Service |
-| **LED Char** | `0000FE41-8E22-4541-9D4C-21EDAE82ED19` | Write w/o Resp | Write `0x01` to turn ON, `0x00` to turn OFF |
+| **LED Char** | `0000FE41-8E22-4541-9D4C-21EDAE82ED19` | Write w/o Resp | Write 2 Bytes: `[ID] [State]`<br>`ID`: 0x01(Blue), 0x02(Green), 0x03(Red)<br>`State`: 0x01(ON), 0x00(OFF) |
 | **Button Char**| `0000FE42-8E22-4541-9D4C-21EDAE82ED19` | Notify | Sends `0x01` on press |
 
 **Note on Advertising**: Due to iBeacon packet size limits, the Device Name ("STM32") is broadcast in the **Scan Response** packet.
+
+## Power Management
+
+The device automatically enters **Low Power Mode (Sleep)** to save energy if:
+1.  Advertising times out (default: 60 seconds).
+2.  No connection is established.
+
+**To Wake Up**: Press **SW1** (Button 1). This will restart advertising.
 
 ## Prerequisites
 

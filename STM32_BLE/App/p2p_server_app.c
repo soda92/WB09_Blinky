@@ -113,15 +113,47 @@ void P2P_SERVER_Notification(P2P_SERVER_NotificationEvt_t *p_Notification) {
 
   case P2P_SERVER_LED_C_WRITE_NO_RESP_EVT:
     /* USER CODE BEGIN Service1Char1_WRITE_NO_RESP_EVT */
-    if (p_Notification->DataTransfered.p_Payload[1] == 0x01) {
-      BSP_LED_On(LED_BLUE);
-      APP_DBG_MSG("-- P2P APPLICATION SERVER : LED1 ON\n");
-      P2P_SERVER_APP_Context.LedControl.Led1 = 0x01; /* LED1 ON */
-    }
-    if (p_Notification->DataTransfered.p_Payload[1] == 0x00) {
-      BSP_LED_Off(LED_BLUE);
-      APP_DBG_MSG("-- P2P APPLICATION SERVER : LED1 OFF\n");
-      P2P_SERVER_APP_Context.LedControl.Led1 = 0x00; /* LED1 OFF */
+    {
+      uint8_t device_id = p_Notification->DataTransfered.p_Payload[0];
+      uint8_t led_state = p_Notification->DataTransfered.p_Payload[1];
+
+      switch (device_id) {
+      case 0x01: // Blue LED
+        if (led_state == 0x01) {
+          BSP_LED_On(LED_BLUE);
+          APP_DBG_MSG("-- P2P APPLICATION SERVER : LED BLUE ON\n");
+          P2P_SERVER_APP_Context.LedControl.Led1 = 0x01;
+        } else {
+          BSP_LED_Off(LED_BLUE);
+          APP_DBG_MSG("-- P2P APPLICATION SERVER : LED BLUE OFF\n");
+          P2P_SERVER_APP_Context.LedControl.Led1 = 0x00;
+        }
+        break;
+
+      case 0x02: // Green LED
+        if (led_state == 0x01) {
+          BSP_LED_On(LED_GREEN);
+          APP_DBG_MSG("-- P2P APPLICATION SERVER : LED GREEN ON\n");
+        } else {
+          BSP_LED_Off(LED_GREEN);
+          APP_DBG_MSG("-- P2P APPLICATION SERVER : LED GREEN OFF\n");
+        }
+        break;
+
+      case 0x03: // Red LED
+        if (led_state == 0x01) {
+          BSP_LED_On(LED_RED);
+          APP_DBG_MSG("-- P2P APPLICATION SERVER : LED RED ON\n");
+        } else {
+          BSP_LED_Off(LED_RED);
+          APP_DBG_MSG("-- P2P APPLICATION SERVER : LED RED OFF\n");
+        }
+        break;
+
+      default:
+        APP_DBG_MSG("-- P2P APPLICATION SERVER : UNKNOWN DEVICE ID 0x%02X\n", device_id);
+        break;
+      }
     }
     /* USER CODE END Service1Char1_WRITE_NO_RESP_EVT */
     break;

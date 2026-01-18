@@ -59,6 +59,18 @@ set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".elf")
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS})
 
+# Force include headers ONLY for C files to fix implicit dependency issues
+foreach(src_file ${SOURCES})
+    if(src_file MATCHES "\\.c$")
+        set_property(SOURCE ${src_file} APPEND PROPERTY COMPILE_OPTIONS
+            "-include" "stdint.h"
+            "-include" "compiler.h"
+            "-include" "ble_status.h"
+            "-include" "ble.h"
+        )
+    endif()
+endforeach()
+
 target_link_options(${PROJECT_NAME} PRIVATE
     -T${LINKER_SCRIPT}
     -Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map
