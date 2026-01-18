@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include "stm32wb0x_ll_utils.h"
 #include "stm32wb0x_ll_adc.h"
+#include "app_ble.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -122,27 +123,43 @@ int main(void)
     Error_Handler();
   }
 
+  APP_BLE_Init();
+
+  uint32_t last_tick = 0;
+  uint8_t led_state = 0;
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* Blue LED ON */
-    BSP_LED_On(LED_BLUE);
-    BSP_LED_Off(LED_GREEN);
-    BSP_LED_Off(LED_RED);
-    HAL_Delay(500);
+    APP_BLE_Tick();
 
-    /* Green LED ON */
-    BSP_LED_Off(LED_BLUE);
-    BSP_LED_On(LED_GREEN);
-    BSP_LED_Off(LED_RED);
-    HAL_Delay(500);
-
-    /* Red LED ON */
-    BSP_LED_Off(LED_BLUE);
-    BSP_LED_Off(LED_GREEN);
-    BSP_LED_On(LED_RED);
-    HAL_Delay(500);
+    if (HAL_GetTick() - last_tick > 500)
+    {
+      last_tick = HAL_GetTick();
+      
+      switch (led_state)
+      {
+        case 0: // Blue
+          BSP_LED_On(LED_BLUE);
+          BSP_LED_Off(LED_GREEN);
+          BSP_LED_Off(LED_RED);
+          led_state = 1;
+          break;
+        case 1: // Green
+          BSP_LED_Off(LED_BLUE);
+          BSP_LED_On(LED_GREEN);
+          BSP_LED_Off(LED_RED);
+          led_state = 2;
+          break;
+        case 2: // Red
+          BSP_LED_Off(LED_BLUE);
+          BSP_LED_Off(LED_GREEN);
+          BSP_LED_On(LED_RED);
+          led_state = 0;
+          break;
+      }
+    }
 
     /* USER CODE END WHILE */
 
@@ -157,7 +174,18 @@ int main(void)
   */
 void SystemClock_Config(void)
 {
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
   /** Configure the SYSCLKSource and SYSCLKDivider
   */
@@ -168,6 +196,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+  HAL_RCCEx_EnableLSCO(RCC_LSCO1, RCC_LSCOSOURCE_LSI);
 }
 
 /**
@@ -213,7 +242,7 @@ static void MX_ADC1_Init(void)
   hadc1.Init.ConversionType = ADC_CONVERSION_WITH_DS;
   hadc1.Init.SequenceLength = 1;
   hadc1.Init.SamplingMode = ADC_SAMPLING_AT_START;
-  hadc1.Init.SampleRate = ADC_SAMPLE_RATE_140;
+  hadc1.Init.SampleRate = ADC_SAMPLE_RATE_16;
   hadc1.Init.InvertOutputMode = ADC_DATA_INVERT_NONE;
   hadc1.Init.Overrun = ADC_NEW_DATA_IS_LOST;
   hadc1.Init.ContinuousConvMode = DISABLE;
@@ -274,6 +303,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF3_SPI3;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : PA10 */
+  GPIO_InitStruct.Pin = GPIO_PIN_10;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Alternate = GPIO_AF1_LCO;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
   /*Configure GPIO pins : I2C1_SDA_Pin I2C1_SCL_Pin */
   GPIO_InitStruct.Pin = I2C1_SDA_Pin|I2C1_SCL_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
@@ -286,13 +323,13 @@ static void MX_GPIO_Init(void)
   HAL_PWREx_DisableGPIOPullUp(PWR_GPIO_B, PWR_GPIO_BIT_3|PWR_GPIO_BIT_7|PWR_GPIO_BIT_6);
 
   /**/
-  HAL_PWREx_DisableGPIOPullUp(PWR_GPIO_A, PWR_GPIO_BIT_8|PWR_GPIO_BIT_9|PWR_GPIO_BIT_11);
+  HAL_PWREx_DisableGPIOPullUp(PWR_GPIO_A, PWR_GPIO_BIT_8|PWR_GPIO_BIT_9|PWR_GPIO_BIT_10|PWR_GPIO_BIT_11);
 
   /**/
   HAL_PWREx_DisableGPIOPullDown(PWR_GPIO_B, PWR_GPIO_BIT_3|PWR_GPIO_BIT_7|PWR_GPIO_BIT_6);
 
   /**/
-  HAL_PWREx_DisableGPIOPullDown(PWR_GPIO_A, PWR_GPIO_BIT_8|PWR_GPIO_BIT_9|PWR_GPIO_BIT_11);
+  HAL_PWREx_DisableGPIOPullDown(PWR_GPIO_A, PWR_GPIO_BIT_8|PWR_GPIO_BIT_9|PWR_GPIO_BIT_10|PWR_GPIO_BIT_11);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 

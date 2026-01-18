@@ -57,11 +57,36 @@ Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_uart.c \
 Core/Src/system_stm32wb0x.c \
 Core/Src/sysmem.c \
 Core/Src/syscalls.c \
-Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_adc.c
+Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_adc.c \
+Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_pka.c \
+Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_radio.c \
+Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_radio_timer.c \
+Drivers/STM32WB0x_HAL_Driver/Src/stm32wb0x_hal_rng.c \
+Middlewares/ST/STM32_BLE/evt_handler/src/ble_evt.c \
+Middlewares/ST/STM32_BLE/stack/config/ble_stack_user_cfg.c \
+Core/Src/app_ble.c \
+Core/Src/bleplat.c \
+Core/Src/pka_manager.c \
+Core/Src/hw_aes.c \
+Core/Src/hw_rng.c \
+Core/Src/bleplat_cntr.c \
+Core/Src/miscutil.c \
+Core/Src/osal.c \
+Core/Src/RADIO_utils.c \
+Core/Src/stm32wb0x_ll_adc.c \
+Core/Src/stm32wb0x_ll_dma.c \
+Core/Src/stm32wb0x_ll_gpio.c \
+Core/Src/stm32wb0x_ll_pwr.c \
+Core/Src/stm32wb0x_ll_rcc.c \
+Core/Src/stm32wb0x_ll_rng.c \
+Core/Src/stm32wb0x_ll_system.c \
+Core/Src/stm32wb0x_ll_usart.c \
+Core/Src/stm32wb0x_ll_utils.c
 
 # ASM sources
 ASM_SOURCES =  \
-startup_stm32wb09.s
+startup_stm32wb09.s \
+Core/Src/blue_unit_conversion.s
 
 # ASMM sources
 ASMM_SOURCES = 
@@ -124,7 +149,11 @@ C_INCLUDES =  \
 -IDrivers/STM32WB0x_HAL_Driver/Inc/Legacy \
 -IDrivers/BSP/STM32WB0x-nucleo \
 -IDrivers/CMSIS/Device/ST/STM32WB0X/Include \
--IDrivers/CMSIS/Include
+-IDrivers/CMSIS/Include \
+-IMiddlewares/ST/STM32_BLE \
+-IMiddlewares/ST/STM32_BLE/stack/include \
+-IMiddlewares/ST/STM32_BLE/evt_handler/inc \
+-IMiddlewares/ST/STM32_BLE/cryptolib/Inc
 
 
 # compile gcc flags
@@ -148,8 +177,8 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 LDSCRIPT = stm32wb09_flash.ld
 
 # libraries
-LIBS = -lc -lm -lnosys 
-LIBDIR = 
+LIBS = -lc -lm -lnosys -l:stm32wb0x_ble_stack.a -lcrypto
+LIBDIR = -LMiddlewares/ST/STM32_BLE/stack/lib -LMiddlewares/ST/STM32_BLE/cryptolib 
 LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 # default action: build all
