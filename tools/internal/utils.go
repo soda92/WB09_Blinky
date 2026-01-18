@@ -37,8 +37,16 @@ func CopyFile(src, dst string) error {
 }
 
 func CopyDir(src, dst string) error {
-	// Using 'cp -r' for simplicity and speed on Linux
-	cmd := exec.Command("cp", "-r", src, dst)
+	// Ensure destination exists
+	if err := os.MkdirAll(dst, 0755); err != nil {
+		return err
+	}
+
+	// Use 'cp -r src/.' to copy contents
+	// We assume Linux/Unix environment where cp is available
+	srcArg := strings.TrimRight(src, "/") + "/."
+
+	cmd := exec.Command("cp", "-r", srcArg, dst)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
