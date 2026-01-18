@@ -8,9 +8,23 @@ import (
 	"os/exec"
 	"strings"
 	"sync"
+
+	"github.com/spf13/cobra"
 )
 
-func RunFlash() {
+var flashCmd = &cobra.Command{
+	Use:   "flash",
+	Short: "Build and Flash the project",
+	Run: func(cmd *cobra.Command, args []string) {
+		runFlash()
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(flashCmd)
+}
+
+func runFlash() {
 	cmd := exec.Command("make", "flash")
 
 	stdout, err := cmd.StdoutPipe()

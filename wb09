@@ -1,0 +1,22 @@
+#!/bin/bash
+# Wrapper to run the Go tool from project root
+# Using 'cd tools' ensures we run in the module context, but we need to ensure paths are correct.
+# The Go tool assumes it is running in Project Root?
+# My code in init.go uses filepath.Join(templatePath, "Core") and copies to "Core".
+# If I run `cd tools && go run . init`, the CWD for the Go process will be `tools/`.
+# So "Core" will be created inside `tools/Core`. This is WRONG!
+
+# I need to ensure the Go process runs in the Project Root.
+# But `go run .` needs to find `go.mod`.
+# 
+# Solution: 
+# Build the tool once, put binary in root, and run it.
+# OR
+# Pass the project root path to the tool.
+# OR
+# `go run -mod=mod tools`? No.
+
+# Best way: Build it.
+cd tools && go build -o ../wb09_tool .
+cd ..
+./wb09_tool "$@"

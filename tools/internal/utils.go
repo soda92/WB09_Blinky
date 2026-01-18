@@ -1,11 +1,11 @@
 package internal
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 )
 
 func FileExists(path string) bool {
@@ -53,14 +53,28 @@ func AppendToFile(path, content string) error {
 	return err
 }
 
-func ReplaceInFile(path, oldString, newString string) error {
-	input, err := os.ReadFile(path)
-	if err != nil {
-		return err
+func FindInPaths(filename string, paths []string) string {
+	for _, p := range paths {
+		fullPath := filepath.Join(p, filename)
+		if FileExists(fullPath) {
+			return fullPath
+		}
 	}
-
-	output := strings.Replace(string(input), oldString, newString, -1)
-
-	err = os.WriteFile(path, []byte(output), 0644)
-	return err
+	return ""
 }
+
+func FindFileInRepo(root, filename string) string {
+	var foundPath string
+	filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && info.Name() == filename {
+			foundPath = path
+			return fmt.Errorf("Found") // Stop searching
+		}
+		return nil
+	})
+	return foundPath
+}
+
