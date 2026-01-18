@@ -1,9 +1,9 @@
 /build
 /flash_tool
-Drivers/
-Middlewares/
-STM32_BLE
+/Drivers/
+/Middlewares/
+/STM32_BLE
 /Core
-Library/
+/Library
 /wb09_tool
 
