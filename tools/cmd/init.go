@@ -90,11 +90,17 @@ func runInit() {
 		}
 	}
 
-	// 5. Generate Makefile
-	fmt.Println("Generating Makefile...")
-	if err := os.WriteFile("Makefile", []byte(templates.Makefile), 0644); err != nil {
-        fmt.Printf("Error generating Makefile: %v\n", err)
-    }
+		// 5. Generate Makefile
+		fmt.Println("Generating Makefile...")
+		if err := os.WriteFile("Makefile", []byte(templates.Makefile), 0644); err != nil {
+			fmt.Printf("Error generating Makefile: %v\n", err)
+		}
 	
-	fmt.Println("Initialization complete.")
-}
+		// 6. Apply Project Configuration
+		if config, err := internal.LoadConfig(); err == nil {
+			fmt.Println("Applying project configuration...")
+			internal.ApplyLPMSetting(config.DisableLPM)
+		}
+		
+		fmt.Println("Initialization complete.")
+	}
