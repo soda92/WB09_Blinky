@@ -769,11 +769,11 @@ void BLEEVT_App_Notification(const hci_pckt *hci_pckt) {
       uint8_t confirm_value;
       APP_DBG_MSG(">>== ACI_GAP_NUMERIC_COMPARISON_VALUE_VSEVT_CODE\n");
       APP_DBG_MSG(
-          "     - numeric_value = %d\n",
+          "     - numeric_value = %lu\n",
           ((aci_gap_numeric_comparison_value_event_rp0 *)(p_blecore_evt->data))
               ->Numeric_Value);
       APP_DBG_MSG(
-          "     - Hex_value = %x\n",
+          "     - Hex_value = %lx\n",
           ((aci_gap_numeric_comparison_value_event_rp0 *)(p_blecore_evt->data))
               ->Numeric_Value);
 

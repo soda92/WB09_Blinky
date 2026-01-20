@@ -62,9 +62,31 @@ var knownSymbols = map[string]string{
 	"HOST_TO_LE_16":        "ble_types.h", // Just in case
 }
 
+var requiredLibs = []string{
+	"Middlewares/ST/STM32_BLE/stack/lib/stm32wb0x_ble_stack.a",
+	"Middlewares/ST/STM32_BLE/cryptolib/libcrypto.a",
+}
+
 func runDeps() {
 	os.MkdirAll(internal.LibIncDir, 0755)
 	os.MkdirAll(internal.LibSrcDir, 0755)
+
+	// 1. Copy Static Libraries (Binaries)
+	fmt.Println("Checking static libraries...")
+	for _, libRelPath := range requiredLibs {
+		localPath := libRelPath // Same relative path locally
+		if !internal.FileExists(localPath) {
+			sdkPath := filepath.Join(internal.SDKPath, libRelPath)
+			if internal.FileExists(sdkPath) {
+				fmt.Printf("Copying library: %s\n", libRelPath)
+				if err := internal.CopyFile(sdkPath, localPath); err != nil {
+					fmt.Printf("Error copying library %s: %v\n", libRelPath, err)
+				}
+			} else {
+				fmt.Printf("Warning: Library not found in SDK: %s\n", sdkPath)
+			}
+		}
+	}
 
 	// Seed with existing source files in all source paths
 	for _, p := range sourcePaths {

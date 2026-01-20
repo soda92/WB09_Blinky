@@ -10,7 +10,7 @@ set(CMAKE_SIZE arm-none-eabi-size)
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-set(CMAKE_C_FLAGS "-mcpu=cortex-m0plus -mthumb -Wall -fdata-sections -ffunction-sections" CACHE INTERNAL "C Compiler options")
+set(CMAKE_C_FLAGS "-mcpu=cortex-m0plus -mthumb -Wall -w -fdata-sections -ffunction-sections" CACHE INTERNAL "C Compiler options")
 set(CMAKE_CXX_FLAGS "-mcpu=cortex-m0plus -mthumb -Wall -fdata-sections -ffunction-sections" CACHE INTERNAL "C++ Compiler options")
 set(CMAKE_ASM_FLAGS "-mcpu=cortex-m0plus -mthumb -x assembler-with-cpp" CACHE INTERNAL "ASM Compiler options")
 

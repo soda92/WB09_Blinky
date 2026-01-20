@@ -86,11 +86,16 @@ func FindInPaths(filename string, paths []string) string {
 
 func FindFileInRepo(root, filename string) string {
 	var foundPath string
+	targetBase := filepath.Base(filename)
 	filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if !info.IsDir() && info.Name() == filename {
+		if !info.IsDir() && info.Name() == targetBase {
+			// If the requested filename had a dir component, check if the found path ends with it
+			if filename != targetBase && !strings.HasSuffix(path, filename) {
+				return nil // Keep searching for a better match
+			}
 			foundPath = path
 			return fmt.Errorf("Found") // Stop searching
 		}

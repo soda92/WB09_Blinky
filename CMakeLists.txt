@@ -26,6 +26,8 @@ list(APPEND SOURCES ${LIB_ASM_SOURCES})
 # Exclude templates
 list(FILTER SOURCES EXCLUDE REGEX ".*_template\.c$")
 
+message(STATUS "Detected Sources: ${SOURCES}")
+
 # Include Directories
 set(INCLUDE_DIRS
     Core/Inc
